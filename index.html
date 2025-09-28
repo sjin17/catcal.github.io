@@ -6,1280 +6,1573 @@
     <title>猫咪记账本</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
-    
-    <!-- 配置Tailwind自定义颜色和字体 -->
+    <script src="https://cdncdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
     <script>
+        // Tailwind 配置
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#FF9AA2', // 粉色作为主色调
-                        secondary: '#B5EAD7', // 浅绿色作为辅助色
-                        accent: '#FFDAC1', // 浅橙色作为强调色
-                        dark: '#6D6875', // 深紫色作为文字色
-                        light: '#FFF1F2', // 极浅粉色作为背景色
+                        primary: '#4F46E5', // 主色调：靛蓝色
+                        secondary: '#EC4899', // 辅助色：粉色
+                        neutral: '#F3F4F6', // 中性色：浅灰
+                        dark: '#1F2937' // 深色
                     },
                     fontFamily: {
-                        cat: ['"Comic Sans MS"', '"Marker Felt"', 'sans-serif'],
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
                     },
                 }
             }
         }
     </script>
-    
     <style type="text/tailwindcss">
         @layer utilities {
             .content-auto {
                 content-visibility: auto;
             }
-            .cat-shadow {
-                box-shadow: 0 4px 15px rgba(255, 154, 162, 0.3);
+            .card-shadow {
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             }
-            .cat-border {
-                border: 2px dashed #FF9AA2;
-            }
-            .rotate-cat {
-                transform: rotate(-5deg);
-            }
-            .rotate-cat-reverse {
-                transform: rotate(5deg);
-            }
-            .error-message {
-                color: #dc2626;
-                font-size: 0.875rem;
-                margin-top: 0.25rem;
+            .btn-hover {
+                @apply transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5;
             }
         }
     </style>
 </head>
-<body class="bg-light font-cat text-dark min-h-screen flex flex-col">
-    <!-- 登录模态框 -->
-    <div id="login-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl p-8 w-full max-w-md mx-4 cat-shadow rotate-cat">
-            <div class="flex justify-center mb-6">
-                <div class="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center">
-                    <i class="fa fa-paw text-primary text-3xl"></i>
-                </div>
-            </div>
-            <h2 class="text-2xl font-bold text-center mb-6">猫咪记账本登录</h2>
-            
-            <div class="mb-4">
-                <button id="show-login" class="w-full py-2 mb-2 border-b-2 border-primary text-primary font-medium">登录</button>
-                <button id="show-register" class="w-full py-2 mb-2 border-b-2 border-transparent text-gray-500 hover:text-primary transition-colors">注册</button>
-            </div>
-            
-            <!-- 登录表单 -->
-            <form id="login-form" class="space-y-4">
-                <div>
-                    <label for="login-username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
-                    <input type="text" id="login-username" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
-                </div>
-                
-                <div>
-                    <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
-                    <input type="password" id="login-password" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
-                </div>
-                
-                <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white py-3 rounded-lg transition-colors flex items-center justify-center">
-                    <i class="fa fa-sign-in mr-2"></i> 登录
-                </button>
-            </form>
-            
-            <!-- 注册表单 (默认隐藏) -->
-            <form id="register-form" class="space-y-4 hidden">
-                <div>
-                    <label for="register-username" class="block text-sm font-medium text-gray-700 mb-1">
-                        用户名 <span class="text-red-500">*</span>
-                    </label>
-                    <input type="text" id="register-username" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
-                    <div id="username-error" class="error-message hidden">该用户名已被注册</div>
-                </div>
-                
-                <div>
-                    <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">
-                        密码 <span class="text-red-500">*</span>
-                    </label>
-                    <input type="password" id="register-password" required minlength="6"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
-                </div>
-                
-                <div>
-                    <label for="register-confirm" class="block text-sm font-medium text-gray-700 mb-1">
-                        确认密码 <span class="text-red-500">*</span>
-                    </label>
-                    <input type="password" id="register-confirm" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
-                </div>
-                
-                <button type="submit" class="w-full bg-secondary hover:bg-secondary/90 text-dark py-3 rounded-lg transition-colors flex items-center justify-center">
-                    <i class="fa fa-user-plus mr-2"></i> 注册
-                </button>
-            </form>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 页面加载动画 -->
+    <div id="loader" class="fixed inset-0 z-50 flex items-center justify-center bg-white">
+        <div class="flex flex-col items-center">
+            <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            <p class="mt-4 text-primary font-medium">加载中...</p>
         </div>
     </div>
 
-    <!-- 顶部导航栏 -->
-    <header class="bg-white shadow-md sticky top-0 z-40 transition-all duration-300">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <i class="fa fa-paw text-primary text-3xl"></i>
-                <h1 class="text-2xl font-bold text-primary">猫咪记账本</h1>
+    <!-- 主应用容器 -->
+    <div id="app" class="hidden">
+        <!-- 登录/注册页面 -->
+        <div id="auth-page" class="min-h-screen flex items-center justify-center p-4">
+            <div class="w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="p-6 sm:p-8">
+                    <div class="text-center mb-8">
+                        <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fa fa-paw text-2xl text-primary"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900">猫咪记账本</h2>
+                        <p class="mt-2 text-gray-500">轻松管理你的每一笔支出</p>
+                    </div>
+
+                    <!-- 登录表单 -->
+                    <div id="login-form">
+                        <div class="mb-4">
+                            <label for="login-username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fa fa-user text-gray-400"></i>
+                                </div>
+                                <input type="text" id="login-username" class="pl-10 block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20 transition-all" placeholder="请输入用户名">
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fa fa-lock text-gray-400"></i>
+                                </div>
+                                <input type="password" id="login-password" class="pl-10 block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20 transition-all" placeholder="请输入密码">
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <button id="login-btn" class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-colors btn-hover">
+                                登录
+                            </button>
+                        </div>
+                        <div class="text-center text-sm text-gray-600">
+                            还没有账号？ <button id="show-register" class="text-primary hover:text-primary/80 font-medium">立即注册</button>
+                        </div>
+                    </div>
+
+                    <!-- 注册表单 -->
+                    <div id="register-form" class="hidden">
+                        <div class="mb-4">
+                            <label for="register-username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fa fa-user text-gray-400"></i>
+                                </div>
+                                <input type="text" id="register-username" class="pl-10 block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20 transition-all" placeholder="请设置用户名">
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fa fa-lock text-gray-400"></i>
+                                </div>
+                                <input type="password" id="register-password" class="pl-10 block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20 transition-all" placeholder="请设置密码">
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <button id="register-btn" class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-colors btn-hover">
+                                注册
+                            </button>
+                        </div>
+                        <div class="text-center text-sm text-gray-600">
+                            已有账号？ <button id="show-login" class="text-primary hover:text-primary/80 font-medium">返回登录</button>
+                        </div>
+                    </div>
+
+                    <!-- 错误提示 -->
+                    <div id="auth-error" class="hidden mt-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm"></div>
+                </div>
             </div>
-            
-            <div class="flex items-center space-x-4">
-                <span id="user-display" class="hidden md:inline-block"></span>
-                <button id="logout-btn" class="text-gray-500 hover:text-primary transition-colors hidden">
-                    <i class="fa fa-sign-out"></i>
-                </button>
-                
-                <nav class="hidden md:flex space-x-6">
-                    <a href="#record" class="nav-link hover:text-primary transition-colors flex items-center">
-                        <i class="fa fa-plus-circle mr-1"></i> 记账
-                    </a>
-                    <a href="#categories" class="nav-link hover:text-primary transition-colors flex items-center">
+        </div>
+
+        <!-- 主应用页面 -->
+        <div id="main-app" class="hidden">
+            <!-- 顶部导航 -->
+            <header class="bg-white shadow-sm fixed top-0 left-0 right-0 z-30">
+                <div class="container mx-auto px-4">
+                    <div class="flex justify-between items-center h-16">
+                        <div class="flex items-center">
+                            <i class="fa fa-paw text-primary text-xl mr-2"></i>
+                            <span class="font-bold text-lg text-gray-800">猫咪记账本</span>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <span id="current-user" class="text-gray-600 hidden sm:inline-block"></span>
+                            <button id="logout-btn" class="text-gray-600 hover:text-primary transition-colors">
+                                <i class="fa fa-sign-out"></i>
+                                <span class="ml-1 hidden sm:inline-block">退出</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 主内容区 -->
+            <main class="container mx-auto px-4 pt-24 pb-16">
+                <!-- 导航标签 -->
+                <div class="flex border-b mb-6 overflow-x-auto pb-1 hide-scrollbar">
+                    <button class="nav-tab active px-4 py-2 font-medium text-primary border-b-2 border-primary mr-2 whitespace-nowrap" data-tab="dashboard">
+                        <i class="fa fa-dashboard mr-1"></i> 总览
+                    </button>
+                    <button class="nav-tab px-4 py-2 font-medium text-gray-500 hover:text-primary mr-2 whitespace-nowrap" data-tab="records">
+                        <i class="fa fa-list-alt mr-1"></i> 记录
+                    </button>
+                    <button class="nav-tab px-4 py-2 font-medium text-gray-500 hover:text-primary mr-2 whitespace-nowrap" data-tab="categories">
                         <i class="fa fa-tags mr-1"></i> 分类
-                    </a>
-                    <a href="#statistics" class="nav-link hover:text-primary transition-colors flex items-center">
+                    </button>
+                    <button class="nav-tab px-4 py-2 font-medium text-gray-500 hover:text-primary whitespace-nowrap" data-tab="statistics">
                         <i class="fa fa-bar-chart mr-1"></i> 统计
-                    </a>
-                    <a href="#history" class="nav-link hover:text-primary transition-colors flex items-center">
-                        <i class="fa fa-history mr-1"></i> 历史
-                    </a>
-                </nav>
-                
-                <button id="mobile-menu-button" class="md:hidden text-dark text-xl">
-                    <i class="fa fa-bars"></i>
-                </button>
-            </div>
-        </div>
-        
-        <!-- 移动端菜单 -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100">
-            <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
-                <a href="#record" class="py-2 hover:text-primary transition-colors flex items-center">
-                    <i class="fa fa-plus-circle mr-2"></i> 记账
-                </a>
-                <a href="#categories" class="py-2 hover:text-primary transition-colors flex items-center">
-                    <i class="fa fa-tags mr-2"></i> 分类
-                </a>
-                <a href="#statistics" class="py-2 hover:text-primary transition-colors flex items-center">
-                    <i class="fa fa-bar-chart mr-2"></i> 统计
-                </a>
-                <a href="#history" class="py-2 hover:text-primary transition-colors flex items-center">
-                    <i class="fa fa-history mr-2"></i> 历史
-                </a>
-                <div class="py-2 border-t border-gray-100 flex items-center justify-between">
-                    <span id="mobile-user-display"></span>
-                    <button id="mobile-logout-btn" class="text-gray-500 hover:text-primary transition-colors">
-                        <i class="fa fa-sign-out"></i> 退出
                     </button>
                 </div>
-            </div>
-        </div>
-    </header>
 
-    <!-- 主要内容区 -->
-    <main class="flex-grow container mx-auto px-4 py-6">
-        <!-- 欢迎消息和状态卡片 -->
-        <section class="mb-8">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-                <div>
-                    <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold">
-                        你好，<span id="welcome-username"></span>！
-                        <span class="text-primary">🐾</span>
-                    </h2>
-                    <p class="text-gray-600">今天是 <span id="current-date" class="font-semibold"></span></p>
-                </div>
-                
-                <div class="mt-4 md:mt-0 bg-white rounded-lg p-4 cat-shadow rotate-cat">
-                    <div class="flex items-center">
-                        <div class="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mr-3">
-                            <i class="fa fa-money text-primary text-xl"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500">本月支出</p>
-                            <p class="text-xl font-bold" id="monthly-total">¥0.00</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 快捷统计卡片 -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-white rounded-lg p-4 cat-shadow hover:scale-105 transition-transform">
-                    <div class="flex items-center">
-                        <div class="w-10 h-10 bg-secondary/30 rounded-full flex items-center justify-center mr-3">
-                            <i class="fa fa-shopping-cart text-green-500"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500">最大支出分类</p>
-                            <p class="font-bold" id="top-category">暂无数据</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-white rounded-lg p-4 cat-shadow hover:scale-105 transition-transform">
-                    <div class="flex items-center">
-                        <div class="w-10 h-10 bg-accent/30 rounded-full flex items-center justify-center mr-3">
-                            <i class="fa fa-calendar text-orange-500"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500">本月记录数</p>
-                            <p class="font-bold" id="record-count">0</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-white rounded-lg p-4 cat-shadow hover:scale-105 transition-transform">
-                    <div class="flex items-center">
-                        <div class="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center mr-3">
-                            <i class="fa fa-line-chart text-pink-500"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500">较上月变化</p>
-                            <p class="font-bold" id="monthly-change">0%</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 记账区域 -->
-        <section id="record" class="mb-10 bg-white rounded-xl p-6 cat-shadow">
-            <div class="flex items-center mb-4">
-                <div class="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center mr-3">
-                    <i class="fa fa-plus-circle text-primary"></i>
-                </div>
-                <h2 class="text-2xl font-bold">添加新记录</h2>
-            </div>
-            
-            <form id="expense-form" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="amount" class="block text-sm font-medium text-gray-700 mb-1">
-                            金额 <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">¥</span>
-                            <input type="number" id="amount" name="amount" step="0.01" min="0.01" 
-                                class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
-                                required placeholder="0.00">
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label for="category" class="block text-sm font-medium text-gray-700 mb-1">
-                            分类 <span class="text-red-500">*</span>
-                        </label>
-                        <select id="category" name="category" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
-                            required>
-                            <option value="">请选择分类</option>
-                            <!-- 分类选项将通过JS动态添加 -->
-                        </select>
-                    </div>
-                </div>
-                
-                <div>
-                    <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
-                        备注
-                    </label>
-                    <input type="text" id="description" name="description" 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
-                        placeholder="例如：购买猫咪零食">
-                </div>
-                
-                <div>
-                    <label for="date" class="block text-sm font-medium text-gray-700 mb-1">
-                        日期 <span class="text-red-500">*</span>
-                    </label>
-                    <input type="date" id="date" name="date" 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
-                        required>
-                </div>
-                
-                <div class="flex justify-end">
-                    <button type="submit" class="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg transition-colors flex items-center">
-                        <i class="fa fa-paw mr-2"></i> 保存记录
-                    </button>
-                </div>
-            </form>
-        </section>
-
-        <!-- 分类管理 -->
-        <section id="categories" class="mb-10 bg-white rounded-xl p-6 cat-shadow">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center mr-3">
-                        <i class="fa fa-tags text-primary"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold">分类管理</h2>
-                </div>
-                
-                <button id="add-category-btn" class="bg-secondary hover:bg-secondary/90 text-dark px-4 py-2 rounded-lg transition-colors flex items-center">
-                    <i class="fa fa-plus mr-2"></i> 添加分类
-                </button>
-            </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="categories-container">
-                <!-- 分类卡片将通过JS动态添加 -->
-            </div>
-            
-            <!-- 添加分类模态框 -->
-            <div id="category-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-                <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4 cat-shadow rotate-cat">
-                    <h3 class="text-xl font-bold mb-4">添加新分类</h3>
-                    <form id="add-category-form" class="space-y-4">
-                        <div>
-                            <label for="new-category-name" class="block text-sm font-medium text-gray-700 mb-1">
-                                分类名称 <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" id="new-category-name" name="new-category-name" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
-                                required placeholder="例如：猫咪用品">
-                        </div>
-                        
-                        <div>
-                            <label for="category-icon" class="block text-sm font-medium text-gray-700 mb-1">
-                                选择图标
-                            </label>
-                            <div class="grid grid-cols-6 gap-2 mt-1" id="icon-selector">
-                                <div class="icon-option w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center cursor-pointer hover:bg-primary/20 transition-colors" data-icon="fa-shopping-bag">
-                                    <i class="fa fa-shopping-bag"></i>
+                <!-- 总览页面 -->
+                <div id="dashboard-tab" class="tab-content">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-gray-500 text-sm">本月支出</p>
+                                    <h3 id="monthly-total" class="text-2xl font-bold text-gray-800 mt-1">¥0.00</h3>
                                 </div>
-                                <div class="icon-option w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center cursor-pointer hover:bg-primary/20 transition-colors" data-icon="fa-utensils">
-                                    <i class="fa fa-utensils"></i>
-                                </div>
-                                <div class="icon-option w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center cursor-pointer hover:bg-primary/20 transition-colors" data-icon="fa-home">
-                                    <i class="fa fa-home"></i>
-                                </div>
-                                <div class="icon-option w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center cursor-pointer hover:bg-primary/20 transition-colors" data-icon="fa-car">
-                                    <i class="fa fa-car"></i>
-                                </div>
-                                <div class="icon-option w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center cursor-pointer hover:bg-primary/20 transition-colors" data-icon="fa-medkit">
-                                    <i class="fa fa-medkit"></i>
-                                </div>
-                                <div class="icon-option w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center cursor-pointer hover:bg-primary/20 transition-colors" data-icon="fa-gamepad">
-                                    <i class="fa fa-gamepad"></i>
+                                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                                    <i class="fa fa-money text-red-500"></i>
                                 </div>
                             </div>
-                            <input type="hidden" id="selected-icon" value="fa-shopping-bag">
+                            <div class="mt-4 text-sm">
+                                <span id="monthly-change" class="text-green-500"><i class="fa fa-arrow-down"></i> 12.5%</span>
+                                <span class="text-gray-500 ml-1">较上月</span>
+                            </div>
                         </div>
-                        
-                        <div class="flex justify-end space-x-3">
-                            <button type="button" id="cancel-category" class="border border-gray-300 px-4 py-2 rounded-lg transition-colors">
-                                取消
-                            </button>
-                            <button type="submit" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors">
-                                保存
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </section>
-
-        <!-- 统计分析 -->
-        <section id="statistics" class="mb-10 bg-white rounded-xl p-6 cat-shadow">
-            <div class="flex items-center mb-6">
-                <div class="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center mr-3">
-                    <i class="fa fa-bar-chart text-primary"></i>
-                </div>
-                <h2 class="text-2xl font-bold">统计分析</h2>
-            </div>
-            
-            <!-- 统计筛选器 -->
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-3 sm:space-y-0">
-                <div class="flex space-x-2">
-                    <button class="period-btn bg-primary text-white px-4 py-2 rounded-lg transition-colors" data-period="month">
-                        按月
-                    </button>
-                    <button class="period-btn bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg transition-colors" data-period="year">
-                        按年
-                    </button>
-                </div>
-                
-                <div class="flex flex-col sm:flex-row w-full sm:w-auto space-y-2 sm:space-y-0 sm:space-x-2">
-                    <div class="relative">
-                        <select id="stats-year" class="pl-3 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all appearance-none w-full sm:w-auto">
-                            <!-- 年份选项将通过JS动态添加 -->
-                        </select>
-                        <i class="fa fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"></i>
-                    </div>
-                    
-                    <div class="relative" id="month-select-container">
-                        <select id="stats-month" class="pl-3 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all appearance-none w-full sm:w-auto">
-                            <option value="1">一月</option>
-                            <option value="2">二月</option>
-                            <option value="3">三月</option>
-                            <option value="4">四月</option>
-                            <option value="5">五月</option>
-                            <option value="6">六月</option>
-                            <option value="7">七月</option>
-                            <option value="8">八月</option>
-                            <option value="9">九月</option>
-                            <option value="10">十月</option>
-                            <option value="11">十一月</option>
-                            <option value="12">十二月</option>
-                        </select>
-                        <i class="fa fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"></i>
-                    </div>
-                    
-                    <div class="relative">
-                        <select id="category-filter" class="pl-3 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all appearance-none w-full sm:w-auto">
-                            <option value="">所有分类</option>
-                            <!-- 分类筛选选项将通过JS动态添加 -->
-                        </select>
-                        <i class="fa fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"></i>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 图表区域 -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <h3 class="text-lg font-semibold mb-3">支出分布</h3>
-                    <div class="aspect-square max-w-md mx-auto">
-                        <canvas id="expense-chart"></canvas>
-                    </div>
-                </div>
-                
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <h3 class="text-lg font-semibold mb-3">趋势分析</h3>
-                    <div class="aspect-square max-w-md mx-auto">
-                        <canvas id="trend-chart"></canvas>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 分类统计表格 -->
-            <div>
-                <h3 class="text-lg font-semibold mb-3">分类统计详情</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead>
-                            <tr>
-                                <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">分类</th>
-                                <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">金额</th>
-                                <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">占比</th>
-                                <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">记录数</th>
-                            </tr>
-                        </thead>
-                        <tbody id="category-stats-body" class="bg-white divide-y divide-gray-200">
-                            <!-- 统计数据将通过JS动态添加 -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- 历史记录 -->
-        <section id="history" class="mb-10 bg-white rounded-xl p-6 cat-shadow">
-            <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center mr-3">
-                        <i class="fa fa-history text-primary"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold">历史记录</h2>
-                </div>
-                
-                <div class="relative">
-                    <input type="text" id="search-history" placeholder="搜索备注或金额..."
-                        class="pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
-                    <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
-                </div>
-            </div>
-            
-            <!-- 历史记录筛选 -->
-            <div class="flex flex-wrap gap-2 mb-4">
-                <button class="history-filter-btn bg-primary text-white px-3 py-1 rounded-full text-sm transition-colors" data-filter="all">
-                    全部
-                </button>
-                <button class="history-filter-btn bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded-full text-sm transition-colors" data-filter="today">
-                    今天
-                </button>
-                <button class="history-filter-btn bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded-full text-sm transition-colors" data-filter="week">
-                    本周
-                </button>
-                <button class="history-filter-btn bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded-full text-sm transition-colors" data-filter="month">
-                    本月
-                </button>
-            </div>
-            
-            <!-- 历史记录列表 -->
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead>
-                        <tr>
-                            <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">日期</th>
-                            <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">分类</th>
-                            <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">金额</th>
-                            <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">备注</th>
-                            <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="history-list" class="bg-white divide-y divide-gray-200">
-                        <!-- 历史记录将通过JS动态添加 -->
-                        <tr class="text-center">
-                            <td colspan="5" class="px-4 py-8 text-gray-500">
-                                <div class="flex flex-col items-center">
-                                    <i class="fa fa-cat text-4xl text-gray-300 mb-2"></i>
-                                    <p>还没有记录哦，添加你的第一笔支出吧！</p>
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-gray-500 text-sm">本月记录</p>
+                                    <h3 id="monthly-count" class="text-2xl font-bold text-gray-800 mt-1">0 条</h3>
                                 </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- 分页 -->
-            <div class="flex justify-center mt-6" id="pagination">
-                <!-- 分页按钮将通过JS动态添加 -->
-            </div>
-        </section>
-    </main>
+                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <i class="fa fa-file-text-o text-blue-500"></i>
+                                </div>
+                            </div>
+                            <div class="mt-4 text-sm">
+                                <span id="record-change" class="text-red-500"><i class="fa fa-arrow-up"></i> 8.3%</span>
+                                <span class="text-gray-500 ml-1">较上月</span>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-gray-500 text-sm">分类数量</p>
+                                    <h3 id="category-count" class="text-2xl font-bold text-gray-800 mt-1">0 个</h3>
+                                </div>
+                                <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                                    <i class="fa fa-tags text-green-500"></i>
+                                </div>
+                            </div>
+                            <div class="mt-4 text-sm">
+                                <button id="add-category-btn" class="text-primary hover:text-primary/80">
+                                    <i class="fa fa-plus-circle"></i> 添加新分类
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
-    <!-- 页脚 -->
-    <footer class="bg-white py-6 border-t border-gray-200">
-        <div class="container mx-auto px-4 text-center">
-            <div class="flex justify-center items-center space-x-2 mb-2">
-                <i class="fa fa-paw text-primary"></i>
-                <p class="font-bold">猫咪记账本</p>
-            </div>
-            <p class="text-sm text-gray-500">用可爱的方式管理你的财务 🐱</p>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="font-bold text-gray-800">支出趋势</h3>
+                                <div class="flex space-x-2">
+                                    <button class="period-btn active px-3 py-1 text-sm rounded-full bg-primary/10 text-primary" data-period="week">本周</button>
+                                    <button class="period-btn px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-period="month">本月</button>
+                                    <button class="period-btn px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" data-period="year">本年</button>
+                                </div>
+                            </div>
+                            <div class="h-64">
+                                <canvas id="trend-chart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <h3 class="font-bold text-gray-800 mb-6">分类占比</h3>
+                            <div class="h-64">
+                                <canvas id="category-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold text-gray-800">最近记录</h3>
+                            <button id="view-all-records" class="text-primary hover:text-primary/80 text-sm">查看全部</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="border-b border-gray-200">
+                                        <th class="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">日期</th>
+                                        <th class="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">描述</th>
+                                        <th class="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">分类</th>
+                                        <th class="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">金额</th>
+                                        <th class="py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-records" class="divide-y divide-gray-200">
+                                    <!-- 最近记录将通过JS动态添加 -->
+                                    <tr>
+                                        <td colspan="5" class="py-8 text-center text-gray-500">暂无记录</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 记录页面 -->
+                <div id="records-tab" class="tab-content hidden">
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
+                        <h3 class="font-bold text-gray-800 mb-4">添加支出记录</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label for="record-amount" class="block text-sm font-medium text-gray-700 mb-1">金额 (¥)</label>
+                                <input type="number" step="0.01" min="0.01" id="record-amount" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20 transition-all" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label for="record-category" class="block text-sm font-medium text-gray-700 mb-1">分类</label>
+                                <select id="record-category" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20 transition-all">
+                                    <option value="">请选择分类</option>
+                                    <!-- 分类将通过JS动态添加 -->
+                                </select>
+                            </div>
+                            <div>
+                                <label for="record-date" class="block text-sm font-medium text-gray-700 mb-1">日期</label>
+                                <input type="date" id="record-date" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20 transition-all">
+                            </div>
+                            <div class="md:col-span-3">
+                                <label for="record-description" class="block text-sm font-medium text-gray-700 mb-1">描述 (可选)</label>
+                                <input type="text" id="record-description" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20 transition-all" placeholder="例如：购买猫粮">
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <button id="add-record-btn" class="bg-primary hover:bg-primary/90 text-white font-medium py-2 px-6 rounded-lg transition-colors btn-hover">
+                                <i class="fa fa-plus mr-1"></i> 添加记录
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                            <h3 class="font-bold text-gray-800">支出记录列表</h3>
+                            <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                                <div class="relative">
+                                    <select id="filter-category" class="pl-3 pr-8 py-2 rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20 transition-all text-sm">
+                                        <option value="">所有分类</option>
+                                        <!-- 分类将通过JS动态添加 -->
+                                    </select>
+                                </div>
+                                <div class="relative">
+                                    <select id="filter-period" class="pl-3 pr-8 py-2 rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20 transition-all text-sm">
+                                        <option value="">所有时间</option>
+                                        <option value="today">今天</option>
+                                        <option value="week">本周</option>
+                                        <option value="month">本月</option>
+                                        <option value="year">本年</option>
+                                    </select>
+                                </div>
+                                <div class="relative flex-grow sm:flex-grow-0">
+                                    <input type="text" id="search-records" placeholder="搜索描述或金额" class="pl-8 pr-3 py-2 w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20 transition-all text-sm">
+                                    <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="border-b border-gray-200">
+                                        <th class="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">日期</th>
+                                        <th class="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">描述</th>
+                                        <th class="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">分类</th>
+                                        <th class="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">金额</th>
+                                        <th class="py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="all-records" class="divide-y divide-gray-200">
+                                    <!-- 记录将通过JS动态添加 -->
+                                    <tr>
+                                        <td colspan="5" class="py-8 text-center text-gray-500">暂无记录</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 flex justify-between items-center">
+                            <p class="text-sm text-gray-500">共 <span id="records-total-count">0</span> 条记录</p>
+                            <div class="flex space-x-2">
+                                <button id="prev-page" class="px-3 py-1 text-sm border rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>上一页</button>
+                                <span id="page-info" class="px-3 py-1 text-sm text-gray-600">第 1 页</span>
+                                <button id="next-page" class="px-3 py-1 text-sm border rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>下一页</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 分类页面 -->
+                <div id="categories-tab" class="tab-content hidden">
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
+                        <h3 class="font-bold text-gray-800 mb-4">添加新分类</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="category-name" class="block text-sm font-medium text-gray-700 mb-1">分类名称</label>
+                                <input type="text" id="category-name" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20 transition-all" placeholder="例如：猫咪用品">
+                            </div>
+                            <div>
+                                <label for="category-icon" class="block text-sm font-medium text-gray-700 mb-1">选择图标</label>
+                                <select id="category-icon" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20 transition-all">
+                                    <option value="fa-utensils">餐饮 <i class="fa fa-utensils"></i></option>
+                                    <option value="fa-shopping-bag">购物 <i class="fa fa-shopping-bag"></i></option>
+                                    <option value="fa-home">住房 <i class="fa fa-home"></i></option>
+                                    <option value="fa-car">交通 <i class="fa fa-car"></i></option>
+                                    <option value="fa-paw">猫咪用品 <i class="fa fa-paw"></i></option>
+                                    <option value="fa-medkit">医疗 <i class="fa fa-medkit"></i></option>
+                                    <option value="fa-graduation-cap">教育 <i class="fa fa-graduation-cap"></i></option>
+                                    <option value="fa-film">娱乐 <i class="fa fa-film"></i></option>
+                                    <option value="fa-mobile">通讯 <i class="fa fa-mobile"></i></option>
+                                    <option value="fa-gift">礼物 <i class="fa fa-gift"></i></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <button id="save-category-btn" class="bg-primary hover:bg-primary/90 text-white font-medium py-2 px-6 rounded-lg transition-colors btn-hover">
+                                <i class="fa fa-save mr-1"></i> 保存分类
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-gray-800 mb-6">分类列表</h3>
+                        <div id="categories-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            <!-- 分类将通过JS动态添加 -->
+                            <div class="col-span-full py-8 text-center text-gray-500">暂无分类</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 统计页面 -->
+                <div id="statistics-tab" class="tab-content hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <p class="text-gray-500 text-sm">总支出</p>
+                            <h3 id="total-expense" class="text-2xl font-bold text-gray-800 mt-1">¥0.00</h3>
+                            <div class="mt-4 text-sm text-gray-500">
+                                所有记录总和
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <p class="text-gray-500 text-sm">平均每日支出</p>
+                            <h3 id="daily-average" class="text-2xl font-bold text-gray-800 mt-1">¥0.00</h3>
+                            <div class="mt-4 text-sm text-gray-500">
+                                基于所有记录计算
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <p class="text-gray-500 text-sm">最大单笔支出</p>
+                            <h3 id="max-expense" class="text-2xl font-bold text-gray-800 mt-1">¥0.00</h3>
+                            <div class="mt-4 text-sm text-gray-500">
+                                <span id="max-expense-date">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="font-bold text-gray-800">分类支出统计</h3>
+                                <div class="relative">
+                                    <select id="category-stats-period" class="pl-3 pr-8 py-1.5 rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20 transition-all text-sm">
+                                        <option value="month">本月</option>
+                                        <option value="year">本年</option>
+                                        <option value="all">全部时间</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="h-80">
+                                <canvas id="category-stats-chart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="font-bold text-gray-800">月度支出趋势</h3>
+                                <div class="relative">
+                                    <select id="year-selector" class="pl-3 pr-8 py-1.5 rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20 transition-all text-sm">
+                                        <!-- 年份将通过JS动态添加 -->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="h-80">
+                                <canvas id="monthly-trend-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-gray-800 mb-6">分类详情</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="border-b border-gray-200">
+                                        <th class="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">分类</th>
+                                        <th class="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">总支出</th>
+                                        <th class="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">记录数</th>
+                                        <th class="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">平均每次</th>
+                                        <th class="py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">占比</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="category-details" class="divide-y divide-gray-200">
+                                    <!-- 分类详情将通过JS动态添加 -->
+                                    <tr>
+                                        <td colspan="5" class="py-8 text-center text-gray-500">暂无数据</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
-    </footer>
+    </div>
 
     <!-- 编辑记录模态框 -->
-    <div id="edit-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl p-6 w-full max-w-lg mx-4 cat-shadow rotate-cat-reverse">
-            <h3 class="text-xl font-bold mb-4">编辑记录</h3>
-            <form id="edit-form" class="space-y-4">
-                <input type="hidden" id="edit-id">
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div id="edit-record-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-lg shadow-xl overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900">编辑支出记录</h3>
+                    <button id="close-edit-modal" class="text-gray-400 hover:text-gray-500">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="px-6 py-4">
+                <input type="hidden" id="edit-record-id">
+                <div class="grid grid-cols-1 gap-4">
                     <div>
-                        <label for="edit-amount" class="block text-sm font-medium text-gray-700 mb-1">
-                            金额 <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">¥</span>
-                            <input type="number" id="edit-amount" name="edit-amount" step="0.01" min="0.01" 
-                                class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
-                                required>
-                        </div>
+                        <label for="edit-record-amount" class="block text-sm font-medium text-gray-700 mb-1">金额 (¥)</label>
+                        <input type="number" step="0.01" min="0.01" id="edit-record-amount" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20 transition-all">
                     </div>
-                    
                     <div>
-                        <label for="edit-category" class="block text-sm font-medium text-gray-700 mb-1">
-                            分类 <span class="text-red-500">*</span>
-                        </label>
-                        <select id="edit-category" name="edit-category" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
-                            required>
-                            <!-- 分类选项将通过JS动态添加 -->
+                        <label for="edit-record-category" class="block text-sm font-medium text-gray-700 mb-1">分类</label>
+                        <select id="edit-record-category" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20 transition-all">
+                            <option value="">请选择分类</option>
+                            <!-- 分类将通过JS动态添加 -->
                         </select>
                     </div>
+                    <div>
+                        <label for="edit-record-date" class="block text-sm font-medium text-gray-700 mb-1">日期</label>
+                        <input type="date" id="edit-record-date" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20 transition-all">
+                    </div>
+                    <div>
+                        <label for="edit-record-description" class="block text-sm font-medium text-gray-700 mb-1">描述 (可选)</label>
+                        <input type="text" id="edit-record-description" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20 transition-all" placeholder="例如：购买猫粮">
+                    </div>
                 </div>
-                
-                <div>
-                    <label for="edit-description" class="block text-sm font-medium text-gray-700 mb-1">
-                        备注
-                    </label>
-                    <input type="text" id="edit-description" name="edit-description" 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
-                </div>
-                
-                <div>
-                    <label for="edit-date" class="block text-sm font-medium text-gray-700 mb-1">
-                        日期 <span class="text-red-500">*</span>
-                    </label>
-                    <input type="date" id="edit-date" name="edit-date" 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
-                        required>
-                </div>
-                
-                <div class="flex justify-end space-x-3">
-                    <button type="button" id="cancel-edit" class="border border-gray-300 px-4 py-2 rounded-lg transition-colors">
-                        取消
-                    </button>
-                    <button type="submit" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors">
-                        保存修改
-                    </button>
-                </div>
-            </form>
+            </div>
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+                <button id="cancel-edit-record" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                    取消
+                </button>
+                <button id="save-edit-record" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                    保存
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- 确认删除模态框 -->
-    <div id="delete-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4 cat-shadow">
-            <h3 class="text-xl font-bold mb-2 flex items-center">
-                <i class="fa fa-exclamation-triangle text-yellow-500 mr-2"></i> 确认删除
-            </h3>
-            <p class="mb-4">你确定要删除这条记录吗？此操作无法撤销。</p>
-            <input type="hidden" id="delete-id">
-            <div class="flex justify-end space-x-3">
-                <button id="cancel-delete" class="border border-gray-300 px-4 py-2 rounded-lg transition-colors">
+    <div id="confirm-delete-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-lg shadow-xl overflow-hidden">
+            <div class="px-6 py-4">
+                <h3 class="text-lg font-medium text-gray-900">确认删除</h3>
+                <p class="mt-2 text-gray-600" id="delete-confirm-message">你确定要删除这条记录吗？此操作不可撤销。</p>
+                <input type="hidden" id="delete-record-id">
+                <input type="hidden" id="delete-category-id">
+            </div>
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+                <button id="cancel-delete" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
                     取消
                 </button>
-                <button id="confirm-delete" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors">
+                <button id="confirm-delete" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
                     删除
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- 成功提示 -->
-    <div id="toast" class="fixed bottom-6 right-6 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center">
-        <i class="fa fa-check-circle mr-2"></i>
-        <span id="toast-message"></span>
-    </div>
-
-    <!-- 猫咪装饰元素 -->
-    <div class="fixed top-20 left-4 opacity-20 hidden md:block rotate-cat">
-        <i class="fa fa-cat text-6xl text-primary"></i>
-    </div>
-    <div class="fixed bottom-20 right-4 opacity-20 hidden md:block rotate-cat-reverse">
-        <i class="fa fa-paw text-6xl text-primary"></i>
-    </div>
+    <!-- 通知提示 -->
+    <div id="toast" class="fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50"></div>
 
     <script>
-        // 用户认证模块
-        const AuthService = {
-            // 初始化用户数据
-            init() {
-                if (!localStorage.getItem('users')) {
-                    localStorage.setItem('users', JSON.stringify([]));
+        // API服务封装 - 所有接口请求都通过这里发送
+        const API_BASE_URL = 'https://qisimiaoxiang.site/catcal/api';
+
+        // 工具函数：处理请求头（添加认证token）
+        const getAuthHeaders = () => {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            // 如果有token，添加到请求头
+            if (currentUser.token) {
+                headers['Authorization'] = `Bearer ${currentUser.token}`;
+            }
+            
+            return headers;
+        };
+
+        // API对象封装（替代原来的export方式）
+        const API = {
+            // 认证相关接口
+            Auth: {
+                // 用户注册 - 对应后端接口：https://qisimiaoxiang.site/api/auth/register
+                register: async (username, password) => {
+                    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify({ username, password })
+                    });
+                    return response.json();
+                },
+                
+                // 用户登录 - 对应后端接口：https://qisimiaoxiang.site/api/auth/login
+                login: async (username, password) => {
+                    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify({ username, password })
+                    });
+                    return response.json();
+                },
+                
+                // 获取当前用户信息 - 对应后端接口：https://qisimiaoxiang.site/api/auth/me
+                getCurrentUser: async () => {
+                    const response = await fetch(`${API_BASE_URL}/auth/me`, {
+                        method: 'GET',
+                        headers: getAuthHeaders()
+                    });
+                    return response.json();
                 }
             },
             
-            // 检查用户名是否已存在
-            isUsernameExists(username) {
-                const users = JSON.parse(localStorage.getItem('users') || '[]');
-                return users.some(user => user.username === username);
-            },
-            
-            // 注册新用户
-            register(username, password) {
-                const users = JSON.parse(localStorage.getItem('users') || '[]');
+            // 分类相关接口
+            Category: {
+                // 获取所有分类 - 对应后端接口：https://qisimiaoxiang.site/api/categories
+                getAll: async () => {
+                    const response = await fetch(`${API_BASE_URL}/categories`, {
+                        method: 'GET',
+                        headers: getAuthHeaders()
+                    });
+                    return response.json();
+                },
                 
-                // 检查用户名是否已存在
-                if (this.isUsernameExists(username)) {
-                    return { success: false, message: '用户名已存在' };
+                // 添加新分类 - 对应后端接口：https://qisimiaoxiang.site/api/categories
+                add: async (category) => {
+                    const response = await fetch(`${API_BASE_URL}/categories`, {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify(category)
+                    });
+                    return response.json();
+                },
+                
+                // 删除分类 - 对应后端接口：https://qisimiaoxiang.site/api/categories/[ID]
+                delete: async (categoryId) => {
+                    const response = await fetch(`${API_BASE_URL}/categories/${categoryId}`, {
+                        method: 'DELETE',
+                        headers: getAuthHeaders()
+                    });
+                    return response.json();
                 }
-                
-                // 创建新用户
-                const newUser = {
-                    id: Date.now(), // 使用时间戳作为简单的唯一ID
-                    username,
-                    password, // 注意：实际应用中应该加密存储密码
-                    createdAt: new Date().toISOString()
-                };
-                
-                users.push(newUser);
-                localStorage.setItem('users', JSON.stringify(users));
-                return { success: true, message: '注册成功' };
             },
             
-            // 用户登录
-            login(username, password) {
-                const users = JSON.parse(localStorage.getItem('users') || '[]');
-                const user = users.find(u => u.username === username && u.password === password);
+            // 支出记录相关接口
+            Record: {
+                // 获取记录列表（支持筛选）- 对应后端接口：https://qisimiaoxiang.site/api/records
+                getRecords: async (params = {}) => {
+                    // 构建查询参数
+                    const queryParams = new URLSearchParams();
+                    Object.entries(params).forEach(([key, value]) => {
+                        if (value !== undefined && value !== null) {
+                            queryParams.append(key, value);
+                        }
+                    });
+                    
+                    const response = await fetch(`${API_BASE_URL}/records?${queryParams.toString()}`, {
+                        method: 'GET',
+                        headers: getAuthHeaders()
+                    });
+                    return response.json();
+                },
                 
-                if (user) {
-                    // 保存登录状态
-                    localStorage.setItem('currentUser', JSON.stringify({
-                        id: user.id,
-                        username: user.username
-                    }));
-                    return { success: true, message: '登录成功' };
+                // 添加新记录 - 对应后端接口：https://qisimiaoxiang.site/api/records
+                addRecord: async (record) => {
+                    const response = await fetch(`${API_BASE_URL}/records`, {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify(record)
+                    });
+                    return response.json();
+                },
+                
+                // 更新记录 - 对应后端接口：https://qisimiaoxiang.site/api/records/[ID]
+                updateRecord: async (recordId, record) => {
+                    const response = await fetch(`${API_BASE_URL}/records/${recordId}`, {
+                        method: 'PUT',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify(record)
+                    });
+                    return response.json();
+                },
+                
+                // 删除记录 - 对应后端接口：https://qisimiaoxiang.site/api/records/[ID]
+                deleteRecord: async (recordId) => {
+                    const response = await fetch(`${API_BASE_URL}/records/${recordId}`, {
+                        method: 'DELETE',
+                        headers: getAuthHeaders()
+                    });
+                    return response.json();
                 }
+            },
+            
+            // 统计相关接口
+            Statistics: {
+                // 分类统计 - 对应后端接口：https://qisimiaoxiang.site/api/statistics/categories
+                getCategoryStats: async (params = {}) => {
+                    const queryParams = new URLSearchParams();
+                    Object.entries(params).forEach(([key, value]) => {
+                        if (value !== undefined && value !== null) {
+                            queryParams.append(key, value);
+                        }
+                    });
+                    
+                    const response = await fetch(`${API_BASE_URL}/statistics/categories?${queryParams.toString()}`, {
+                        method: 'GET',
+                        headers: getAuthHeaders()
+                    });
+                    return response.json();
+                },
                 
-                return { success: false, message: '用户名或密码错误' };
-            },
-            
-            // 用户登出
-            logout() {
-                localStorage.removeItem('currentUser');
-            },
-            
-            // 获取当前登录用户
-            getCurrentUser() {
-                const user = localStorage.getItem('currentUser');
-                return user ? JSON.parse(user) : null;
-            },
-            
-            // 检查用户是否已登录
-            isLoggedIn() {
-                return !!this.getCurrentUser();
+                // 趋势统计 - 对应后端接口：https://qisimiaoxiang.site/api/statistics/trends
+                getTrendStats: async (params = {}) => {
+                    const queryParams = new URLSearchParams();
+                    Object.entries(params).forEach(([key, value]) => {
+                        if (value !== undefined && value !== null) {
+                            queryParams.append(key, value);
+                        }
+                    });
+                    
+                    const response = await fetch(`${API_BASE_URL}/statistics/trends?${queryParams.toString()}`, {
+                        method: 'GET',
+                        headers: getAuthHeaders()
+                    });
+                    return response.json();
+                }
             }
         };
 
-        // 数据模型
-        const DataModel = {
-            // 初始化数据
-            init() {
-                AuthService.init();
-                
-                // 检查本地存储中是否有数据，没有则初始化
-                if (!localStorage.getItem('expenseCategories')) {
-                    const defaultCategories = [
-                        { id: 1, name: '餐饮', icon: 'fa-utensils' },
-                        { id: 2, name: '购物', icon: 'fa-shopping-bag' },
-                        { id: 3, name: '住房', icon: 'fa-home' },
-                        { id: 4, name: '交通', icon: 'fa-car' },
-                        { id: 5, name: '猫咪用品', icon: 'fa-paw' }
-                    ];
-                    localStorage.setItem('expenseCategories', JSON.stringify(defaultCategories));
-                }
-                
-                if (!localStorage.getItem('expenseRecords')) {
-                    localStorage.setItem('expenseRecords', JSON.stringify([]));
-                }
-            },
+        // 工具函数
+        const formatCurrency = (amount) => {
+            return '¥' + parseFloat(amount).toFixed(2);
+        };
+
+        const showToast = (message, type = 'success') => {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transform translate-y-0 opacity-100 transition-all duration-300 z-50';
             
-            // 获取所有分类（分类是共享的）
-            getCategories() {
-                return JSON.parse(localStorage.getItem('expenseCategories') || '[]');
-            },
+            if (type === 'success') {
+                toast.classList.add('bg-green-500', 'text-white');
+            } else if (type === 'error') {
+                toast.classList.add('bg-red-500', 'text-white');
+            } else if (type === 'warning') {
+                toast.classList.add('bg-yellow-500', 'text-white');
+            }
             
-            // 添加新分类
-            addCategory(category) {
-                const categories = this.getCategories();
-                const newId = categories.length > 0 
-                    ? Math.max(...categories.map(c => c.id)) + 1 
-                    : 1;
-                const newCategory = { id: newId, ...category };
-                categories.push(newCategory);
-                localStorage.setItem('expenseCategories', JSON.stringify(categories));
-                return newCategory;
-            },
-            
-            // 删除分类
-            deleteCategory(id) {
-                const categories = this.getCategories();
-                const updatedCategories = categories.filter(c => c.id !== id);
-                localStorage.setItem('expenseCategories', JSON.stringify(updatedCategories));
-                
-                // 同时删除该分类下的所有记录（所有用户的）
-                const records = this.getRecords();
-                const updatedRecords = records.filter(r => r.categoryId !== id);
-                localStorage.setItem('expenseRecords', JSON.stringify(updatedRecords));
-            },
-            
-            // 获取当前用户的所有记录
-            getRecords() {
-                const currentUser = AuthService.getCurrentUser();
-                if (!currentUser) return [];
-                
-                const allRecords = JSON.parse(localStorage.getItem('expenseRecords') || '[]');
-                // 只返回当前用户的记录
-                return allRecords.filter(record => record.userId === currentUser.id);
-            },
-            
-            // 添加新记录（关联到当前用户）
-            addRecord(record) {
-                const currentUser = AuthService.getCurrentUser();
-                if (!currentUser) return null;
-                
-                const allRecords = JSON.parse(localStorage.getItem('expenseRecords') || '[]');
-                const newId = allRecords.length > 0 
-                    ? Math.max(...allRecords.map(r => r.id)) + 1 
-                    : 1;
-                // 添加用户ID，关联到当前用户
-                const newRecord = { id: newId, userId: currentUser.id, ...record };
-                allRecords.push(newRecord);
-                localStorage.setItem('expenseRecords', JSON.stringify(allRecords));
-                return newRecord;
-            },
-            
-            // 更新记录
-            updateRecord(id, updatedData) {
-                const currentUser = AuthService.getCurrentUser();
-                if (!currentUser) return null;
-                
-                const allRecords = JSON.parse(localStorage.getItem('expenseRecords') || '[]');
-                const index = allRecords.findIndex(r => r.id === id && r.userId === currentUser.id);
-                
-                if (index !== -1) {
-                    allRecords[index] = { ...allRecords[index], ...updatedData };
-                    localStorage.setItem('expenseRecords', JSON.stringify(allRecords));
-                    return allRecords[index];
-                }
-                return null;
-            },
-            
-            // 删除记录
-            deleteRecord(id) {
-                const currentUser = AuthService.getCurrentUser();
-                if (!currentUser) return;
-                
-                const allRecords = JSON.parse(localStorage.getItem('expenseRecords') || '[]');
-                const updatedRecords = allRecords.filter(r => !(r.id === id && r.userId === currentUser.id));
-                localStorage.setItem('expenseRecords', JSON.stringify(updatedRecords));
-            },
-            
-            // 按条件筛选当前用户的记录
-            filterRecords(filters = {}) {
-                const currentUser = AuthService.getCurrentUser();
-                if (!currentUser) return [];
-                
-                let allRecords = JSON.parse(localStorage.getItem('expenseRecords') || '[]');
-                // 先筛选出当前用户的记录
-                let records = allRecords.filter(r => r.userId === currentUser.id);
-                
-                // 按年份筛选
-                if (filters.year) {
-                    records = records.filter(r => new Date(r.date).getFullYear() === filters.year);
-                }
-                
-                // 按月筛选
-                if (filters.month) {
-                    records = records.filter(r => new Date(r.date).getMonth() + 1 === filters.month);
-                }
-                
-                // 按分类筛选
-                if (filters.categoryId) {
-                    records = records.filter(r => r.categoryId === filters.categoryId);
-                }
-                
-                // 按日期范围筛选（今天、本周、本月）
-                if (filters.period) {
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    
-                    switch (filters.period) {
-                        case 'today':
-                            records = records.filter(r => new Date(r.date).toDateString() === today.toDateString());
-                            break;
-                        case 'week':
-                            const weekStart = new Date(today);
-                            weekStart.setDate(today.getDate() - today.getDay());
-                            records = records.filter(r => new Date(r.date) >= weekStart && new Date(r.date) <= new Date());
-                            break;
-                        case 'month':
-                            const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-                            records = records.filter(r => new Date(r.date) >= monthStart && new Date(r.date) <= new Date());
-                            break;
-                    }
-                }
-                
-                // 按搜索词筛选
-                if (filters.search) {
-                    const searchLower = filters.search.toLowerCase();
-                    records = records.filter(r => 
-                        r.description.toLowerCase().includes(searchLower) || 
-                        r.amount.toString().includes(searchLower)
-                    );
-                }
-                
-                // 按日期降序排序
-                return records.sort((a, b) => new Date(b.date) - new Date(a.date));
-            },
-            
-            // 获取分类统计数据
-            getCategoryStats(filters = {}) {
-                const records = this.filterRecords(filters);
-                const categories = this.getCategories();
-                
-                // 计算每个分类的总金额和记录数
-                const stats = categories.map(category => {
-                    const categoryRecords = records.filter(r => r.categoryId === category.id);
-                    const total = categoryRecords.reduce((sum, r) => sum + parseFloat(r.amount), 0);
-                    return {
-                        category,
-                        total,
-                        count: categoryRecords.length
-                    };
-                }).filter(stat => stat.count > 0 || !filters.categoryId); // 保留有记录的分类或所有分类（当没有筛选特定分类时）
-                
-                // 计算总计和百分比
-                const total = stats.reduce((sum, s) => sum + s.total, 0);
-                stats.forEach(stat => {
-                    stat.percentage = total > 0 ? (stat.total / total) * 100 : 0;
-                });
-                
-                // 按金额降序排序
-                return {
-                    stats: stats.sort((a, b) => b.total - a.total),
-                    total
-                };
-            },
-            
-            // 获取趋势统计数据
-            getTrendStats(filters = {}) {
-                const records = this.filterRecords(filters);
-                const isMonthly = filters.periodType === 'month';
-                
-                // 按日或按月分组
-                const groups = {};
-                
-                records.forEach(record => {
-                    const date = new Date(record.date);
-                    let key;
-                    
-                    if (isMonthly) {
-                        // 按月视图：按日分组
-                        key = date.getDate();
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        };
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 隐藏加载动画
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('opacity-0', 'pointer-events-none');
+                document.getElementById('app').classList.remove('hidden');
+            }, 800);
+
+            // 检查用户登录状态
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            if (currentUser.token) {
+                try {
+                    // 验证token有效性
+                    const userData = await API.Auth.getCurrentUser();
+                    if (userData.id) {
+                        // 已登录，显示主应用
+                        document.getElementById('auth-page').classList.add('hidden');
+                        document.getElementById('main-app').classList.remove('hidden');
+                        document.getElementById('current-user').textContent = currentUser.username;
+                        
+                        // 初始化应用数据
+                        await initAppData();
                     } else {
-                        // 按年视图：按月分组
-                        key = date.getMonth() + 1;
+                        throw new Error('认证失败');
                     }
-                    
-                    if (!groups[key]) {
-                        groups[key] = 0;
-                    }
-                    groups[key] += parseFloat(record.amount);
-                });
-                
-                // 准备图表数据
-                const labels = isMonthly 
-                    ? Array.from({length: new Date(filters.year, filters.month, 0).getDate()}, (_, i) => i + 1)
-                    : Array.from({length: 12}, (_, i) => i + 1);
-                
-                const data = labels.map(key => groups[key] || 0);
-                
-                return {
-                    labels,
-                    data
-                };
+                } catch (error) {
+                    // 认证失败，清除本地存储
+                    localStorage.removeItem('currentUser');
+                    document.getElementById('auth-page').classList.remove('hidden');
+                    document.getElementById('main-app').classList.add('hidden');
+                    showToast('登录已过期，请重新登录', 'warning');
+                }
+            } else {
+                // 未登录，显示登录页面
+                document.getElementById('auth-page').classList.remove('hidden');
+                document.getElementById('main-app').classList.add('hidden');
             }
-        };
 
-        // UI控制器
-        const UIController = {
-            // 初始化UI
-            init() {
-                // 检查用户是否已登录
-                if (AuthService.isLoggedIn()) {
-                    this.showApp();
-                    this.updateUserDisplay();
-                } else {
-                    // 显示登录模态框
-                    document.getElementById('login-modal').classList.remove('hidden');
-                }
+            // 登录/注册切换
+            document.getElementById('show-register').addEventListener('click', () => {
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('register-form').classList.remove('hidden');
+                document.getElementById('auth-error').classList.add('hidden');
+            });
+
+            document.getElementById('show-login').addEventListener('click', () => {
+                document.getElementById('register-form').classList.add('hidden');
+                document.getElementById('login-form').classList.remove('hidden');
+                document.getElementById('auth-error').classList.add('hidden');
+            });
+
+            // 注册功能
+            document.getElementById('register-btn').addEventListener('click', async () => {
+                const username = document.getElementById('register-username').value.trim();
+                const password = document.getElementById('register-password').value;
+                const errorEl = document.getElementById('auth-error');
                 
-                this.setCurrentDate();
-                this.initDateField();
-                this.renderCategories();
-                this.renderHistory();
-                this.renderStatistics();
-                this.updateSummaryStats();
-                this.initEventListeners();
-                this.populateYearSelector();
-            },
-            
-            // 显示应用内容（用户已登录）
-            showApp() {
-                document.getElementById('login-modal').classList.add('hidden');
-                // 可以在这里添加应用内容的显示逻辑
-            },
-            
-            // 更新用户显示
-            updateUserDisplay() {
-                const user = AuthService.getCurrentUser();
-                if (user) {
-                    document.getElementById('user-display').textContent = `欢迎，${user.username}`;
-                    document.getElementById('mobile-user-display').textContent = user.username;
-                    document.getElementById('welcome-username').textContent = user.username;
-                    document.getElementById('logout-btn').classList.remove('hidden');
-                }
-            },
-            
-            // 设置当前日期显示
-            setCurrentDate() {
-                const now = new Date();
-                const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
-                document.getElementById('current-date').textContent = now.toLocaleDateString('zh-CN', options);
-            },
-            
-            // 初始化日期字段为当前日期
-            initDateField() {
-                const now = new Date();
-                const dateString = now.toISOString().split('T')[0];
-                document.getElementById('date').value = dateString;
-                
-                // 设置统计默认年份和月份为当前
-                document.getElementById('stats-year').value = now.getFullYear();
-                document.getElementById('stats-month').value = now.getMonth() + 1;
-            },
-            
-            // 渲染分类列表
-            renderCategories() {
-                const categories = DataModel.getCategories();
-                const container = document.getElementById('categories-container');
-                const categorySelect = document.getElementById('category');
-                const editCategorySelect = document.getElementById('edit-category');
-                const filterSelect = document.getElementById('category-filter');
-                
-                // 清空现有内容
-                container.innerHTML = '';
-                categorySelect.innerHTML = '<option value="">请选择分类</option>';
-                editCategorySelect.innerHTML = '';
-                filterSelect.innerHTML = '<option value="">所有分类</option>';
-                
-                // 添加分类到UI
-                categories.forEach(category => {
-                    // 分类卡片
-                    const card = document.createElement('div');
-                    card.className = 'bg-gray-50 rounded-lg p-4 flex justify-between items-center cat-border hover:bg-primary/5 transition-colors';
-                    card.innerHTML = `
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center mr-3">
-                                <i class="fa ${category.icon} text-primary"></i>
-                            </div>
-                            <span class="font-medium">${category.name}</span>
-                        </div>
-                        <button class="delete-category text-gray-400 hover:text-red-500 transition-colors" data-id="${category.id}">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                    `;
-                    container.appendChild(card);
-                    
-                    // 添加到分类选择器
-                    const option = document.createElement('option');
-                    option.value = category.id;
-                    option.textContent = category.name;
-                    categorySelect.appendChild(option);
-                    
-                    // 添加到编辑分类选择器
-                    const editOption = document.createElement('option');
-                    editOption.value = category.id;
-                    editOption.textContent = category.name;
-                    editCategorySelect.appendChild(editOption);
-                    
-                    // 添加到筛选器
-                    const filterOption = document.createElement('option');
-                    filterOption.value = category.id;
-                    filterOption.textContent = category.name;
-                    filterSelect.appendChild(filterOption);
-                });
-            },
-            
-            // 渲染历史记录
-            renderHistory(filters = {}) {
-                const records = DataModel.filterRecords(filters);
-                const container = document.getElementById('history-list');
-                const categories = DataModel.getCategories();
-                
-                // 清空现有内容
-                container.innerHTML = '';
-                
-                if (records.length === 0) {
-                    container.innerHTML = `
-                        <tr class="text-center">
-                            <td colspan="5" class="px-4 py-8 text-gray-500">
-                                <div class="flex flex-col items-center">
-                                    <i class="fa fa-cat text-4xl text-gray-300 mb-2"></i>
-                                    <p>还没有记录哦，添加你的第一笔支出吧！</p>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
+                if (!username || !password) {
+                    errorEl.textContent = '用户名和密码不能为空';
+                    errorEl.classList.remove('hidden');
                     return;
                 }
                 
-                // 添加记录到表格
-                records.forEach(record => {
-                    const category = categories.find(c => c.id === record.categoryId);
-                    const row = document.createElement('tr');
-                    row.className = 'hover:bg-gray-50 transition-colors';
-                    row.innerHTML = `
-                        <td class="px-4 py-3 whitespace-nowrap">
-                            ${new Date(record.date).toLocaleDateString('zh-CN')}
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <i class="fa ${category?.icon || 'fa-question'} text-primary mr-2"></i>
-                                ${category?.name || '未知分类'}
-                            </div>
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap font-medium">
-                            ¥${parseFloat(record.amount).toFixed(2)}
-                        </td>
-                        <td class="px-4 py-3">
-                            ${record.description || '-'}
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap">
-                            <div class="flex space-x-2">
-                                <button class="edit-record text-blue-500 hover:text-blue-700 transition-colors" data-id="${record.id}">
-                                    <i class="fa fa-edit"></i>
-                                </button>
-                                <button class="delete-record text-red-500 hover:text-red-700 transition-colors" data-id="${record.id}">
+                try {
+                    const result = await API.Auth.register(username, password);
+                    if (result.token) {
+                        // 注册成功，保存用户信息
+                        localStorage.setItem('currentUser', JSON.stringify({
+                            id: result.user.id,
+                            username: result.user.username,
+                            token: result.token
+                        }));
+                        
+                        // 切换到主应用
+                        document.getElementById('auth-page').classList.add('hidden');
+                        document.getElementById('main-app').classList.remove('hidden');
+                        document.getElementById('current-user').textContent = username;
+                        
+                        // 初始化应用数据
+                        await initAppData();
+                        
+                        showToast('注册成功，欢迎使用猫咪记账本！');
+                    } else {
+                        errorEl.textContent = result.message || '注册失败';
+                        errorEl.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    errorEl.textContent = '网络错误，请稍后重试';
+                    errorEl.classList.remove('hidden');
+                }
+            });
+
+            // 登录功能
+            document.getElementById('login-btn').addEventListener('click', async () => {
+                const username = document.getElementById('login-username').value.trim();
+                const password = document.getElementById('login-password').value;
+                const errorEl = document.getElementById('auth-error');
+                
+                if (!username || !password) {
+                    errorEl.textContent = '用户名和密码不能为空';
+                    errorEl.classList.remove('hidden');
+                    return;
+                }
+                
+                try {
+                    const result = await API.Auth.login(username, password);
+                    if (result.token) {
+                        // 登录成功，保存用户信息
+                        localStorage.setItem('currentUser', JSON.stringify({
+                            id: result.user.id,
+                            username: result.user.username,
+                            token: result.token
+                        }));
+                        
+                        // 切换到主应用
+                        document.getElementById('auth-page').classList.add('hidden');
+                        document.getElementById('main-app').classList.remove('hidden');
+                        document.getElementById('current-user').textContent = username;
+                        
+                        // 初始化应用数据
+                        await initAppData();
+                        
+                        showToast('登录成功，欢迎回来！');
+                    } else {
+                        errorEl.textContent = result.message || '用户名或密码错误';
+                        errorEl.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    errorEl.textContent = '网络错误，请稍后重试';
+                    errorEl.classList.remove('hidden');
+                }
+            });
+
+            // 退出登录
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                localStorage.removeItem('currentUser');
+                document.getElementById('auth-page').classList.remove('hidden');
+                document.getElementById('main-app').classList.add('hidden');
+                // 清空表单
+                document.getElementById('login-username').value = '';
+                document.getElementById('login-password').value = '';
+                document.getElementById('register-username').value = '';
+                document.getElementById('register-password').value = '';
+                document.getElementById('auth-error').classList.add('hidden');
+                showToast('已成功退出登录');
+            });
+
+            // 导航标签切换
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // 移除所有标签的active类
+                    document.querySelectorAll('.nav-tab').forEach(t => {
+                        t.classList.remove('active', 'text-primary', 'border-primary');
+                        t.classList.add('text-gray-500');
+                    });
+                    
+                    // 给当前标签添加active类
+                    tab.classList.add('active', 'text-primary', 'border-primary');
+                    tab.classList.remove('text-gray-500');
+                    
+                    // 隐藏所有内容
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    
+                    // 显示对应内容
+                    const tabId = tab.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+                });
+            });
+
+            // 从总览页面查看所有记录
+            document.getElementById('view-all-records').addEventListener('click', () => {
+                document.querySelector('.nav-tab[data-tab="records"]').click();
+            });
+
+            // 添加分类按钮点击
+            document.getElementById('add-category-btn').addEventListener('click', () => {
+                document.querySelector('.nav-tab[data-tab="categories"]').click();
+            });
+
+            // 初始化应用数据
+            async function initAppData() {
+                try {
+                    // 加载分类数据
+                    await loadCategories();
+                    
+                    // 加载记录数据
+                    await loadRecords();
+                    
+                    // 加载统计数据
+                    await loadStatistics();
+                    
+                    // 设置默认日期为今天
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('record-date').value = today;
+                } catch (error) {
+                    console.error('初始化数据失败:', error);
+                    showToast('数据加载失败，请刷新页面重试', 'error');
+                }
+            }
+
+            // 加载分类数据
+            async function loadCategories() {
+                try {
+                    const categories = await API.Category.getAll();
+                    
+                    // 更新分类计数
+                    document.getElementById('category-count').textContent = `${categories.length} 个`;
+                    
+                    // 填充分类选择器
+                    const recordCategory = document.getElementById('record-category');
+                    const filterCategory = document.getElementById('filter-category');
+                    const editRecordCategory = document.getElementById('edit-record-category');
+                    
+                    // 清空现有选项（保留第一个）
+                    while (recordCategory.options.length > 1) {
+                        recordCategory.remove(1);
+                    }
+                    while (filterCategory.options.length > 1) {
+                        filterCategory.remove(1);
+                    }
+                    while (editRecordCategory.options.length > 1) {
+                        editRecordCategory.remove(1);
+                    }
+                    
+                    // 添加分类选项
+                    categories.forEach(category => {
+                        // 记录表单中的分类选择器
+                        const option1 = document.createElement('option');
+                        option1.value = category.id;
+                        option1.textContent = category.name;
+                        recordCategory.appendChild(option1);
+                        
+                        // 筛选器中的分类选择器
+                        const option2 = document.createElement('option');
+                        option2.value = category.id;
+                        option2.textContent = category.name;
+                        filterCategory.appendChild(option2);
+                        
+                        // 编辑表单中的分类选择器
+                        const option3 = document.createElement('option');
+                        option3.value = category.id;
+                        option3.textContent = category.name;
+                        editRecordCategory.appendChild(option3);
+                    });
+                    
+                    // 更新分类列表页面
+                    const categoriesList = document.getElementById('categories-list');
+                    if (categories.length === 0) {
+                        categoriesList.innerHTML = '<div class="col-span-full py-8 text-center text-gray-500">暂无分类</div>';
+                    } else {
+                        categoriesList.innerHTML = '';
+                        categories.forEach(category => {
+                            const categoryCard = document.createElement('div');
+                            categoryCard.className = 'bg-gray-50 rounded-lg p-4 border border-gray-100 flex justify-between items-center';
+                            categoryCard.innerHTML = `
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
+                                        <i class="fa ${category.icon} text-primary"></i>
+                                    </div>
+                                    <span class="font-medium">${category.name}</span>
+                                </div>
+                                <button class="delete-category-btn text-red-500 hover:text-red-600 p-1" data-id="${category.id}" data-name="${category.name}">
                                     <i class="fa fa-trash"></i>
                                 </button>
-                            </div>
-                        </td>
-                    `;
-                    container.appendChild(row);
-                });
-                
-                // 绑定编辑和删除按钮事件
-                this.bindRecordActions();
-            },
-            
-            // 渲染统计图表
-            renderStatistics() {
-                const year = parseInt(document.getElementById('stats-year').value);
-                const month = parseInt(document.getElementById('stats-month').value);
-                const categoryId = document.getElementById('category-filter').value 
-                    ? parseInt(document.getElementById('category-filter').value) 
-                    : null;
-                const isMonthly = document.querySelector('.period-btn.bg-primary').dataset.period === 'month';
-                
-                // 筛选条件
-                const filters = {
-                    year,
-                    categoryId,
-                    periodType: isMonthly ? 'month' : 'year'
-                };
-                
-                if (isMonthly) {
-                    filters.month = month;
+                            `;
+                            categoriesList.appendChild(categoryCard);
+                        });
+                        
+                        // 添加删除分类事件监听
+                        document.querySelectorAll('.delete-category-btn').forEach(btn => {
+                            btn.addEventListener('click', (e) => {
+                                const categoryId = e.currentTarget.getAttribute('data-id');
+                                const categoryName = e.currentTarget.getAttribute('data-name');
+                                document.getElementById('delete-category-id').value = categoryId;
+                                document.getElementById('delete-record-id').value = '';
+                                document.getElementById('delete-confirm-message').textContent = `你确定要删除分类"${categoryName}"吗？此操作不可撤销。`;
+                                document.getElementById('confirm-delete-modal').classList.remove('hidden');
+                            });
+                        });
+                    }
+                    
+                    return categories;
+                } catch (error) {
+                    console.error('加载分类失败:', error);
+                    showToast('加载分类失败', 'error');
+                    return [];
                 }
+            }
+
+            // 保存新分类
+            document.getElementById('save-category-btn').addEventListener('click', async () => {
+                const name = document.getElementById('category-name').value.trim();
+                const icon = document.getElementById('category-icon').value;
                 
-                // 获取统计数据
-                const categoryStats = DataModel.getCategoryStats(filters);
-                const trendStats = DataModel.getTrendStats(filters);
-                
-                // 渲染分类统计表格
-                this.renderCategoryStatsTable(categoryStats.stats);
-                
-                // 渲染支出分布图表
-                this.renderExpenseChart(categoryStats.stats);
-                
-                // 渲染趋势图表
-                this.renderTrendChart(trendStats, isMonthly);
-            },
-            
-            // 渲染分类统计表格
-            renderCategoryStatsTable(stats) {
-                const container = document.getElementById('category-stats-body');
-                container.innerHTML = '';
-                
-                if (stats.length === 0) {
-                    container.innerHTML = `
-                        <tr class="text-center">
-                            <td colspan="4" class="px-4 py-6 text-gray-500">
-                                没有找到统计数据
-                            </td>
-                        </tr>
-                    `;
+                if (!name) {
+                    showToast('分类名称不能为空', 'warning');
                     return;
                 }
                 
-                stats.forEach(stat => {
-                    const row = document.createElement('tr');
-                    row.className = 'hover:bg-gray-50 transition-colors';
-                    row.innerHTML = `
-                        <td class="px-4 py-3 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <i class="fa ${stat.category.icon} text-primary mr-2"></i>
-                                ${stat.category.name}
-                            </div>
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap font-medium">
-                            ¥${stat.total.toFixed(2)}
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <div class="w-24 bg-gray-200 rounded-full h-2 mr-2">
-                                    <div class="bg-primary h-2 rounded-full" style="width: ${stat.percentage}%"></div>
-                                </div>
-                                <span>${stat.percentage.toFixed(1)}%</span>
-                            </div>
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap">
-                            ${stat.count}
-                        </td>
-                    `;
-                    container.appendChild(row);
-                });
-            },
-            
-            // 渲染支出分布图表
-            renderExpenseChart(stats) {
-                const ctx = document.getElementById('expense-chart').getContext('2d');
+                try {
+                    const result = await API.Category.add({ name, icon });
+                    if (result.category) {
+                        showToast('分类添加成功');
+                        // 清空表单
+                        document.getElementById('category-name').value = '';
+                        // 重新加载分类
+                        await loadCategories();
+                        // 重新加载统计数据
+                        await loadStatistics();
+                    } else {
+                        showToast(result.message || '添加分类失败', 'error');
+                    }
+                } catch (error) {
+                    console.error('添加分类失败:', error);
+                    showToast('添加分类失败，请稍后重试', 'error');
+                }
+            });
+
+            // 加载记录数据
+            async function loadRecords(params = {}) {
+                try {
+                    const records = await API.Record.getRecords(params);
+                    
+                    // 更新记录计数
+                    document.getElementById('records-total-count').textContent = records.length;
+                    
+                    // 更新记录列表页面
+                    const allRecordsEl = document.getElementById('all-records');
+                    if (records.length === 0) {
+                        allRecordsEl.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-gray-500">暂无记录</td></tr>';
+                    } else {
+                        allRecordsEl.innerHTML = '';
+                        records.forEach(record => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td class="py-3 whitespace-nowrap">${record.date}</td>
+                                <td class="py-3">${record.description || '-'}</td>
+                                <td class="py-3 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <i class="fa ${record.category_icon} text-primary mr-2"></i>
+                                        ${record.category_name}
+                                    </div>
+                                </td>
+                                <td class="py-3 whitespace-nowrap font-medium">${formatCurrency(record.amount)}</td>
+                                <td class="py-3 whitespace-nowrap text-right">
+                                    <button class="edit-record-btn text-primary hover:text-primary/80 mr-3" data-id="${record.id}">
+                                        <i class="fa fa-pencil"></i>
+                                    </button>
+                                    <button class="delete-record-btn text-red-500 hover:text-red-600" data-id="${record.id}">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            `;
+                            allRecordsEl.appendChild(tr);
+                        });
+                        
+                        // 添加编辑记录事件监听
+                        document.querySelectorAll('.edit-record-btn').forEach(btn => {
+                            btn.addEventListener('click', async (e) => {
+                                const recordId = e.currentTarget.getAttribute('data-id');
+                                const record = records.find(r => r.id == recordId);
+                                
+                                if (record) {
+                                    document.getElementById('edit-record-id').value = record.id;
+                                    document.getElementById('edit-record-amount').value = record.amount;
+                                    document.getElementById('edit-record-description').value = record.description || '';
+                                    document.getElementById('edit-record-date').value = record.date;
+                                    document.getElementById('edit-record-category').value = record.category_id;
+                                    document.getElementById('edit-record-modal').classList.remove('hidden');
+                                }
+                            });
+                        });
+                        
+                        // 添加删除记录事件监听
+                        document.querySelectorAll('.delete-record-btn').forEach(btn => {
+                            btn.addEventListener('click', (e) => {
+                                const recordId = e.currentTarget.getAttribute('data-id');
+                                document.getElementById('delete-record-id').value = recordId;
+                                document.getElementById('delete-category-id').value = '';
+                                document.getElementById('delete-confirm-message').textContent = '你确定要删除这条记录吗？此操作不可撤销。';
+                                document.getElementById('confirm-delete-modal').classList.remove('hidden');
+                            });
+                        });
+                    }
+                    
+                    // 更新最近记录（只显示前5条）
+                    const recentRecordsEl = document.getElementById('recent-records');
+                    const recentRecords = [...records].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+                    
+                    if (recentRecords.length === 0) {
+                        recentRecordsEl.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-gray-500">暂无记录</td></tr>';
+                    } else {
+                        recentRecordsEl.innerHTML = '';
+                        recentRecords.forEach(record => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td class="py-3 whitespace-nowrap">${record.date}</td>
+                                <td class="py-3">${record.description || '-'}</td>
+                                <td class="py-3 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <i class="fa ${record.category_icon} text-primary mr-2"></i>
+                                        ${record.category_name}
+                                    </div>
+                                </td>
+                                <td class="py-3 whitespace-nowrap font-medium">${formatCurrency(record.amount)}</td>
+                                <td class="py-3 whitespace-nowrap text-right">
+                                    <button class="edit-record-btn text-primary hover:text-primary/80 mr-3" data-id="${record.id}">
+                                        <i class="fa fa-pencil"></i>
+                                    </button>
+                                    <button class="delete-record-btn text-red-500 hover:text-red-600" data-id="${record.id}">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            `;
+                            recentRecordsEl.appendChild(tr);
+                            
+                            // 为最近记录添加编辑和删除事件
+                            tr.querySelector('.edit-record-btn').addEventListener('click', async () => {
+                                document.getElementById('edit-record-id').value = record.id;
+                                document.getElementById('edit-record-amount').value = record.amount;
+                                document.getElementById('edit-record-description').value = record.description || '';
+                                document.getElementById('edit-record-date').value = record.date;
+                                document.getElementById('edit-record-category').value = record.category_id;
+                                document.getElementById('edit-record-modal').classList.remove('hidden');
+                            });
+                            
+                            tr.querySelector('.delete-record-btn').addEventListener('click', () => {
+                                document.getElementById('delete-record-id').value = record.id;
+                                document.getElementById('delete-category-id').value = '';
+                                document.getElementById('delete-confirm-message').textContent = '你确定要删除这条记录吗？此操作不可撤销。';
+                                document.getElementById('confirm-delete-modal').classList.remove('hidden');
+                            });
+                        });
+                    }
+                    
+                    return records;
+                } catch (error) {
+                    console.error('加载记录失败:', error);
+                    showToast('加载记录失败', 'error');
+                    return [];
+                }
+            }
+
+            // 添加新记录
+            document.getElementById('add-record-btn').addEventListener('click', async () => {
+                const amount = document.getElementById('record-amount').value;
+                const categoryId = document.getElementById('record-category').value;
+                const date = document.getElementById('record-date').value;
+                const description = document.getElementById('record-description').value.trim();
                 
-                // 准备图表数据
-                const labels = stats.map(stat => stat.category.name);
-                const data = stats.map(stat => stat.total);
-                const backgroundColors = [
-                    '#FF9AA2', '#B5EAD7', '#C7CEEA', '#FFDAC1', '#E2F0CB', 
-                    '#FD9A9A', '#FECB65', '#A1C4FD', '#C8E6C9', '#FFB7B2'
-                ];
-                
-                // 如果已有图表实例，先销毁
-                if (window.expenseChartInstance) {
-                    window.expenseChartInstance.destroy();
+                if (!amount || !categoryId || !date) {
+                    showToast('金额、分类和日期为必填项', 'warning');
+                    return;
                 }
                 
-                // 创建新图表
-                window.expenseChartInstance = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            data: data,
-                            backgroundColor: backgroundColors.slice(0, labels.length),
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        const value = context.raw;
-                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                        const percentage = ((value / total) * 100).toFixed(1);
-                                        return `${context.label}: ¥${value.toFixed(2)} (${percentage}%)`;
-                                    }
-                                }
-                            }
+                try {
+                    const result = await API.Record.addRecord({
+                        amount,
+                        category_id: categoryId,
+                        date,
+                        description
+                    });
+                    
+                    if (result.record) {
+                        showToast('记录添加成功');
+                        // 清空表单
+                        document.getElementById('record-amount').value = '';
+                        document.getElementById('record-description').value = '';
+                        // 重新加载记录
+                        await loadRecords(getFilterParams());
+                        // 重新加载统计数据
+                        await loadStatistics();
+                    } else {
+                        showToast(result.message || '添加记录失败', 'error');
+                    }
+                } catch (error) {
+                    console.error('添加记录失败:', error);
+                    showToast('添加记录失败，请稍后重试', 'error');
+                }
+            });
+
+            // 关闭编辑模态框
+            document.getElementById('close-edit-modal').addEventListener('click', () => {
+                document.getElementById('edit-record-modal').classList.add('hidden');
+            });
+
+            document.getElementById('cancel-edit-record').addEventListener('click', () => {
+                document.getElementById('edit-record-modal').classList.add('hidden');
+            });
+
+            // 保存编辑的记录
+            document.getElementById('save-edit-record').addEventListener('click', async () => {
+                const recordId = document.getElementById('edit-record-id').value;
+                const amount = document.getElementById('edit-record-amount').value;
+                const categoryId = document.getElementById('edit-record-category').value;
+                const date = document.getElementById('edit-record-date').value;
+                const description = document.getElementById('edit-record-description').value.trim();
+                
+                if (!amount || !categoryId || !date) {
+                    showToast('金额、分类和日期为必填项', 'warning');
+                    return;
+                }
+                
+                try {
+                    const result = await API.Record.updateRecord(recordId, {
+                        amount,
+                        category_id: categoryId,
+                        date,
+                        description
+                    });
+                    
+                    if (result.record) {
+                        showToast('记录更新成功');
+                        // 关闭模态框
+                        document.getElementById('edit-record-modal').classList.add('hidden');
+                        // 重新加载记录
+                        await loadRecords(getFilterParams());
+                        // 重新加载统计数据
+                        await loadStatistics();
+                    } else {
+                        showToast(result.message || '更新记录失败', 'error');
+                    }
+                } catch (error) {
+                    console.error('更新记录失败:', error);
+                    showToast('更新记录失败，请稍后重试', 'error');
+                }
+            });
+
+            // 关闭确认删除模态框
+            document.getElementById('cancel-delete').addEventListener('click', () => {
+                document.getElementById('confirm-delete-modal').classList.add('hidden');
+            });
+
+            // 确认删除
+            document.getElementById('confirm-delete').addEventListener('click', async () => {
+                const recordId = document.getElementById('delete-record-id').value;
+                const categoryId = document.getElementById('delete-category-id').value;
+                
+                try {
+                    if (recordId) {
+                        // 删除记录
+                        const result = await API.Record.deleteRecord(recordId);
+                        if (result.message) {
+                            showToast('记录已删除');
+                            // 重新加载记录
+                            await loadRecords(getFilterParams());
+                            // 重新加载统计数据
+                            await loadStatistics();
+                        } else {
+                            showToast(result.message || '删除记录失败', 'error');
+                        }
+                    } else if (categoryId) {
+                        // 删除分类
+                        const result = await API.Category.delete(categoryId);
+                        if (result.message) {
+                            showToast('分类已删除');
+                            // 重新加载分类
+                            await loadCategories();
+                            // 重新加载记录
+                            await loadRecords(getFilterParams());
+                            // 重新加载统计数据
+                            await loadStatistics();
+                        } else {
+                            showToast(result.message || '删除分类失败', 'error');
                         }
                     }
-                });
-            },
-            
-            // 渲染趋势图表
-            renderTrendChart(trendStats, isMonthly) {
+                    
+                    // 关闭模态框
+                    document.getElementById('confirm-delete-modal').classList.add('hidden');
+                } catch (error) {
+                    console.error('删除失败:', error);
+                    showToast('删除失败，请稍后重试', 'error');
+                }
+            });
+
+            // 获取筛选参数
+            function getFilterParams() {
+                const categoryId = document.getElementById('filter-category').value;
+                const period = document.getElementById('filter-period').value;
+                const search = document.getElementById('search-records').value.trim();
+                
+                const params = {};
+                if (categoryId) params.category_id = categoryId;
+                if (period) params.period = period;
+                if (search) params.search = search;
+                
+                return params;
+            }
+
+            // 筛选记录
+            document.getElementById('filter-category').addEventListener('change', async () => {
+                await loadRecords(getFilterParams());
+            });
+
+            document.getElementById('filter-period').addEventListener('change', async () => {
+                await loadRecords(getFilterParams());
+            });
+
+            document.getElementById('search-records').addEventListener('input', async (e) => {
+                // 延迟搜索，避免输入时频繁请求
+                clearTimeout(window.searchTimeout);
+                window.searchTimeout = setTimeout(async () => {
+                    await loadRecords(getFilterParams());
+                }, 500);
+            });
+
+            // 加载统计数据
+            async function loadStatistics() {
+                try {
+                    const today = new Date();
+                    const currentMonth = today.getMonth() + 1;
+                    const currentYear = today.getFullYear();
+                    
+                    // 获取本月统计
+                    const monthlyStats = await API.Statistics.getCategoryStats({ month: currentMonth, year: currentYear });
+                    document.getElementById('monthly-total').textContent = formatCurrency(monthlyStats.total || 0);
+                    
+                    // 获取上月统计
+                    const lastMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+                    const lastYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+                    const lastMonthStats = await API.Statistics.getCategoryStats({ month: lastMonth, year: lastYear });
+                    
+                    // 计算月度变化
+                    const monthlyChangeEl = document.getElementById('monthly-change');
+                    if (lastMonthStats.total > 0 && monthlyStats.total > 0) {
+                        const changePercent = ((monthlyStats.total - lastMonthStats.total) / lastMonthStats.total) * 100;
+                        if (changePercent > 0) {
+                            monthlyChangeEl.innerHTML = `<i class="fa fa-arrow-up"></i> ${Math.abs(changePercent).toFixed(1)}%`;
+                            monthlyChangeEl.className = 'text-red-500';
+                        } else {
+                            monthlyChangeEl.innerHTML = `<i class="fa fa-arrow-down"></i> ${Math.abs(changePercent).toFixed(1)}%`;
+                            monthlyChangeEl.className = 'text-green-500';
+                        }
+                    } else {
+                        monthlyChangeEl.innerHTML = `<i class="fa fa-minus"></i> 0%`;
+                        monthlyChangeEl.className = 'text-gray-500';
+                    }
+                    
+                    // 获取本月记录数
+                    const monthlyRecords = await API.Record.getRecords({ month: currentMonth, year: currentYear });
+                    document.getElementById('monthly-count').textContent = `${monthlyRecords.length} 条`;
+                    
+                    // 获取上月记录数
+                    const lastMonthRecords = await API.Record.getRecords({ month: lastMonth, year: lastYear });
+                    
+                    // 计算记录数变化
+                    const recordChangeEl = document.getElementById('record-change');
+                    if (lastMonthRecords.length > 0 && monthlyRecords.length > 0) {
+                        const changePercent = ((monthlyRecords.length - lastMonthRecords.length) / lastMonthRecords.length) * 100;
+                        if (changePercent > 0) {
+                            recordChangeEl.innerHTML = `<i class="fa fa-arrow-up"></i> ${Math.abs(changePercent).toFixed(1)}%`;
+                            recordChangeEl.className = 'text-red-500';
+                        } else {
+                            recordChangeEl.innerHTML = `<i class="fa fa-arrow-down"></i> ${Math.abs(changePercent).toFixed(1)}%`;
+                            recordChangeEl.className = 'text-green-500';
+                        }
+                    } else {
+                        recordChangeEl.innerHTML = `<i class="fa fa-minus"></i> 0%`;
+                        recordChangeEl.className = 'text-gray-500';
+                    }
+                    
+                    // 加载所有记录用于统计
+                    const allRecords = await API.Record.getRecords();
+                    
+                    // 计算总支出
+                    const totalExpense = allRecords.reduce((sum, record) => sum + parseFloat(record.amount), 0);
+                    document.getElementById('total-expense').textContent = formatCurrency(totalExpense);
+                    
+                    // 计算平均每日支出
+                    if (allRecords.length > 0) {
+                        const dates = allRecords.map(r => r.date).sort();
+                        const firstDate = new Date(dates[0]);
+                        const lastDate = new Date(dates[dates.length - 1]);
+                        const days = Math.ceil((lastDate - firstDate) / (1000 * 60 * 60 * 24)) + 1;
+                        const dailyAverage = totalExpense / days;
+                        document.getElementById('daily-average').textContent = formatCurrency(dailyAverage);
+                    } else {
+                        document.getElementById('daily-average').textContent = formatCurrency(0);
+                    }
+                    
+                    // 计算最大单笔支出
+                    if (allRecords.length > 0) {
+                        const maxRecord = allRecords.reduce((max, record) => {
+                            return parseFloat(record.amount) > parseFloat(max.amount) ? record : max;
+                        }, allRecords[0]);
+                        document.getElementById('max-expense').textContent = formatCurrency(maxRecord.amount);
+                        document.getElementById('max-expense-date').textContent = maxRecord.date;
+                    } else {
+                        document.getElementById('max-expense').textContent = formatCurrency(0);
+                        document.getElementById('max-expense-date').textContent = '--';
+                    }
+                    
+                    // 初始化趋势图表（周）
+                    initTrendChart('week');
+                    
+                    // 初始化分类占比图表
+                    initCategoryChart();
+                    
+                    // 初始化分类统计图表
+                    initCategoryStatsChart('month');
+                    
+                    // 初始化月度趋势图表
+                    initMonthlyTrendChart(currentYear);
+                    
+                    // 填充年份选择器
+                    const yearSelector = document.getElementById('year-selector');
+                    yearSelector.innerHTML = '';
+                    
+                    // 获取所有记录的年份
+                    const years = [...new Set(allRecords.map(r => new Date(r.date).getFullYear()))];
+                    if (years.length === 0) {
+                        years.push(currentYear);
+                    }
+                    
+                    // 添加年份选项
+                    years.forEach(year => {
+                        const option = document.createElement('option');
+                        option.value = year;
+                        option.textContent = year;
+                        if (year === currentYear) {
+                            option.selected = true;
+                        }
+                        yearSelector.appendChild(option);
+                    });
+                    
+                    // 年份选择变化时重新加载月度趋势图表
+                    yearSelector.addEventListener('change', (e) => {
+                        initMonthlyTrendChart(parseInt(e.target.value));
+                    });
+                    
+                    // 分类统计周期变化
+                    document.getElementById('category-stats-period').addEventListener('change', (e) => {
+                        const period = e.target.value;
+                        initCategoryStatsChart(period);
+                    });
+                    
+                    // 趋势周期按钮点击
+                    document.querySelectorAll('.period-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            document.querySelectorAll('.period-btn').forEach(b => {
+                                b.classList.remove('active', 'bg-primary/10', 'text-primary');
+                                b.classList.add('bg-gray-100', 'text-gray-600');
+                            });
+                            
+                            e.target.classList.add('active', 'bg-primary/10', 'text-primary');
+                            e.target.classList.remove('bg-gray-100', 'text-gray-600');
+                            
+                            const period = e.target.getAttribute('data-period');
+                            initTrendChart(period);
+                        });
+                    });
+                    
+                } catch (error) {
+                    console.error('加载统计数据失败:', error);
+                    showToast('加载统计数据失败', 'error');
+                }
+            }
+
+            // 初始化趋势图表
+            async function initTrendChart(period) {
                 const ctx = document.getElementById('trend-chart').getContext('2d');
+                const today = new Date();
+                let stats, labels, title;
                 
-                // 准备图表数据
-                const labels = isMonthly 
-                    ? trendStats.labels.map(day => `${day}日`)
-                    : trendStats.labels.map(month => `${month}月`);
+                if (period === 'week') {
+                    // 本周
+                    const weekStart = new Date(today);
+                    weekStart.setDate(today.getDate() - today.getDay());
+                    stats = await API.Statistics.getTrendStats({ period_type: 'day', year: today.getFullYear(), month: today.getMonth() + 1 });
+                    labels = stats.labels.map(day => `周${['日', '一', '二', '三', '四', '五', '六'][new Date(today.getFullYear(), today.getMonth(), day).getDay()]}`);
+                    title = '本周支出趋势';
+                } else if (period === 'month') {
+                    // 本月
+                    stats = await API.Statistics.getTrendStats({ period_type: 'day', year: today.getFullYear(), month: today.getMonth() + 1 });
+                    labels = stats.labels.map(day => `${day}日`);
+                    title = '本月支出趋势';
+                } else {
+                    // 本年
+                    stats = await API.Statistics.getTrendStats({ period_type: 'month', year: today.getFullYear() });
+                    labels = stats.labels.map(month => `${month}月`);
+                    title = '本年支出趋势';
+                }
                 
-                // 如果已有图表实例，先销毁
-                if (window.trendChartInstance) {
-                    window.trendChartInstance.destroy();
+                // 销毁已存在的图表
+                if (window.trendChart) {
+                    window.trendChart.destroy();
                 }
                 
                 // 创建新图表
-                window.trendChartInstance = new Chart(ctx, {
-                    type: 'bar',
+                window.trendChart = new Chart(ctx, {
+                    type: 'line',
                     data: {
                         labels: labels,
                         datasets: [{
                             label: '支出金额',
-                            data: trendStats.data,
-                            backgroundColor: '#FF9AA2',
-                            borderColor: '#FF9AA2',
-                            borderWidth: 1
+                            data: stats.data,
+                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                            borderColor: 'rgba(79, 70, 229, 1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true,
+                            pointBackgroundColor: 'rgba(79, 70, 229, 1)',
+                            pointRadius: 3,
+                            pointHoverRadius: 5
                         }]
                     },
                     options: {
                         responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return formatCurrency(context.raw);
+                                    }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: title,
+                                font: {
+                                    size: 16
+                                }
+                            }
+                        },
                         scales: {
                             y: {
                                 beginAtZero: true,
@@ -1289,497 +1582,303 @@
                                     }
                                 }
                             }
+                        }
+                    }
+                });
+            }
+
+            // 初始化分类占比图表
+            async function initCategoryChart() {
+                const ctx = document.getElementById('category-chart').getContext('2d');
+                const today = new Date();
+                const stats = await API.Statistics.getCategoryStats({ month: today.getMonth() + 1, year: today.getFullYear() });
+                
+                // 销毁已存在的图表
+                if (window.categoryChart) {
+                    window.categoryChart.destroy();
+                }
+                
+                // 如果没有数据
+                if (stats.stats.length === 0) {
+                    window.categoryChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['暂无数据'],
+                            datasets: [{
+                                data: [1],
+                                backgroundColor: ['#e5e7eb'],
+                                borderWidth: 0
+                            }]
                         },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom'
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return `${context.label}: ${formatCurrency(context.raw)}`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    return;
+                }
+                
+                // 准备图表数据
+                const labels = stats.stats.map(item => item.category.name);
+                const data = stats.stats.map(item => item.total);
+                const colors = [
+                    'rgba(79, 70, 229, 0.8)',
+                    'rgba(236, 72, 153, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(139, 92, 246, 0.8)'
+                ];
+                
+                // 创建图表
+                window.categoryChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: colors.slice(0, data.length),
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
                         plugins: {
+                            legend: {
+                                position: 'bottom'
+                            },
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
-                                        return `金额: ¥${context.raw.toFixed(2)}`;
+                                        const value = context.raw;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `${context.label}: ${formatCurrency(value)} (${percentage}%)`;
                                     }
                                 }
                             }
                         }
                     }
                 });
-            },
-            
-            // 更新摘要统计信息
-            updateSummaryStats() {
-                const now = new Date();
-                const currentYear = now.getFullYear();
-                const currentMonth = now.getMonth() + 1;
-                
-                // 本月统计
-                const monthlyStats = DataModel.getCategoryStats({
-                    year: currentYear,
-                    month: currentMonth
-                });
-                
-                // 上月统计（用于计算变化率）
-                let lastMonth = currentMonth - 1;
-                let lastYear = currentYear;
-                if (lastMonth < 1) {
-                    lastMonth = 12;
-                    lastYear = currentYear - 1;
-                }
-                
-                const lastMonthStats = DataModel.getCategoryStats({
-                    year: lastYear,
-                    month: lastMonth
-                });
-                
-                // 更新UI
-                document.getElementById('monthly-total').textContent = `¥${monthlyStats.total.toFixed(2)}`;
-                document.getElementById('record-count').textContent = DataModel.filterRecords({
-                    year: currentYear,
-                    month: currentMonth
-                }).length;
-                
-                // 计算并更新变化率
-                if (lastMonthStats.total > 0) {
-                    const changeRate = ((monthlyStats.total - lastMonthStats.total) / lastMonthStats.total) * 100;
-                    const changeText = changeRate >= 0 
-                        ? `+${changeRate.toFixed(1)}%` 
-                        : `${changeRate.toFixed(1)}%`;
-                    const changeClass = changeRate >= 0 ? 'text-red-500' : 'text-green-500';
-                    const changeIcon = changeRate >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
-                    
-                    document.getElementById('monthly-change').innerHTML = `
-                        <span class="${changeClass}">
-                            <i class="fa ${changeIcon}"></i> ${changeText}
-                        </span>
-                    `;
-                } else {
-                    document.getElementById('monthly-change').textContent = '0%';
-                }
-                
-                // 更新最大支出分类
-                if (monthlyStats.stats.length > 0) {
-                    document.getElementById('top-category').textContent = monthlyStats.stats[0].category.name;
-                } else {
-                    document.getElementById('top-category').textContent = '暂无数据';
-                }
-            },
-            
-            // 填充年份选择器
-            populateYearSelector() {
-                const yearSelect = document.getElementById('stats-year');
-                const currentUser = AuthService.getCurrentUser();
-                if (!currentUser) return;
-                
-                const allRecords = JSON.parse(localStorage.getItem('expenseRecords') || '[]');
-                const userRecords = allRecords.filter(r => r.userId === currentUser.id);
-                
-                // 获取所有记录中的年份
-                const years = new Set();
-                const currentYear = new Date().getFullYear();
-                years.add(currentYear);
-                years.add(currentYear - 1);
-                
-                userRecords.forEach(record => {
-                    const year = new Date(record.date).getFullYear();
-                    years.add(year);
-                });
-                
-                // 清空并添加年份选项
-                yearSelect.innerHTML = '';
-                Array.from(years).sort((a, b) => b - a).forEach(year => {
-                    const option = document.createElement('option');
-                    option.value = year;
-                    option.textContent = year;
-                    yearSelect.appendChild(option);
-                });
-            },
-            
-            // 显示提示消息
-            showToast(message) {
-                const toast = document.getElementById('toast');
-                const toastMessage = document.getElementById('toast-message');
-                
-                toastMessage.textContent = message;
-                toast.classList.remove('translate-y-20', 'opacity-0');
-                toast.classList.add('translate-y-0', 'opacity-100');
-                
-                setTimeout(() => {
-                    toast.classList.remove('translate-y-0', 'opacity-100');
-                    toast.classList.add('translate-y-20', 'opacity-0');
-                }, 3000);
-            },
-            
-            // 绑定记录操作按钮事件
-            bindRecordActions() {
-                // 编辑记录
-                document.querySelectorAll('.edit-record').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        const id = parseInt(e.currentTarget.dataset.id);
-                        const allRecords = JSON.parse(localStorage.getItem('expenseRecords') || '[]');
-                        const currentUser = AuthService.getCurrentUser();
-                        const record = allRecords.find(r => r.id === id && r.userId === currentUser.id);
-                        
-                        if (record) {
-                            document.getElementById('edit-id').value = record.id;
-                            document.getElementById('edit-amount').value = record.amount;
-                            document.getElementById('edit-category').value = record.categoryId;
-                            document.getElementById('edit-description').value = record.description || '';
-                            document.getElementById('edit-date').value = record.date;
-                            
-                            document.getElementById('edit-modal').classList.remove('hidden');
-                        }
-                    });
-                });
-                
-                // 删除记录
-                document.querySelectorAll('.delete-record').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        const id = parseInt(e.currentTarget.dataset.id);
-                        document.getElementById('delete-id').value = id;
-                        document.getElementById('delete-modal').classList.remove('hidden');
-                    });
-                });
-            },
-            
-            // 初始化所有事件监听器
-            initEventListeners() {
-                // 登录表单提交
-                document.getElementById('login-form').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    
-                    const username = document.getElementById('login-username').value;
-                    const password = document.getElementById('login-password').value;
-                    
-                    const result = AuthService.login(username, password);
-                    if (result.success) {
-                        this.showApp();
-                        this.updateUserDisplay();
-                        this.renderHistory();
-                        this.renderStatistics();
-                        this.updateSummaryStats();
-                        this.populateYearSelector();
-                        this.showToast(result.message);
-                    } else {
-                        alert(result.message);
-                    }
-                });
-                
-                // 注册表单提交
-                document.getElementById('register-form').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    
-                    const username = document.getElementById('register-username').value;
-                    const password = document.getElementById('register-password').value;
-                    const confirm = document.getElementById('register-confirm').value;
-                    
-                    // 检查用户名是否已存在
-                    if (AuthService.isUsernameExists(username)) {
-                        document.getElementById('username-error').classList.remove('hidden');
-                        return;
-                    }
-                    
-                    if (password !== confirm) {
-                        alert('两次输入的密码不一致');
-                        return;
-                    }
-                    
-                    const result = AuthService.register(username, password);
-                    if (result.success) {
-                        // 注册成功后自动登录
-                        AuthService.login(username, password);
-                        this.showApp();
-                        this.updateUserDisplay();
-                        this.renderHistory();
-                        this.renderStatistics();
-                        this.updateSummaryStats();
-                        this.populateYearSelector();
-                        this.showToast('注册并登录成功！');
-                    } else {
-                        alert(result.message);
-                    }
-                });
-                
-                // 实时检查用户名是否已存在
-                document.getElementById('register-username').addEventListener('input', (e) => {
-                    const username = e.target.value.trim();
-                    const errorElement = document.getElementById('username-error');
-                    
-                    if (username && AuthService.isUsernameExists(username)) {
-                        errorElement.classList.remove('hidden');
-                    } else {
-                        errorElement.classList.add('hidden');
-                    }
-                });
-                
-                // 切换到登录表单
-                document.getElementById('show-login').addEventListener('click', () => {
-                    this.showLoginForm();
-                });
-                
-                // 切换到注册表单
-                document.getElementById('show-register').addEventListener('click', () => {
-                    this.showRegisterForm();
-                });
-                
-                // 登出按钮
-                document.getElementById('logout-btn').addEventListener('click', () => {
-                    AuthService.logout();
-                    window.location.reload(); // 重新加载页面，显示登录界面
-                });
-                
-                // 移动端登出按钮
-                document.getElementById('mobile-logout-btn').addEventListener('click', () => {
-                    AuthService.logout();
-                    window.location.reload(); // 重新加载页面，显示登录界面
-                });
-                
-                // 移动端菜单切换
-                document.getElementById('mobile-menu-button').addEventListener('click', () => {
-                    document.getElementById('mobile-menu').classList.toggle('hidden');
-                });
-                
-                // 添加新记录表单提交
-                document.getElementById('expense-form').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    
-                    const newRecord = {
-                        amount: parseFloat(document.getElementById('amount').value),
-                        categoryId: parseInt(document.getElementById('category').value),
-                        description: document.getElementById('description').value,
-                        date: document.getElementById('date').value
-                    };
-                    
-                    DataModel.addRecord(newRecord);
-                    this.renderHistory();
-                    this.renderStatistics();
-                    this.updateSummaryStats();
-                    this.populateYearSelector();
-                    
-                    // 重置表单
-                    e.target.reset();
-                    document.getElementById('date').value = new Date().toISOString().split('T')[0];
-                    
-                    this.showToast('记录添加成功！');
-                });
-                
-                // 添加分类按钮
-                document.getElementById('add-category-btn').addEventListener('click', () => {
-                    document.getElementById('category-modal').classList.remove('hidden');
-                    document.getElementById('new-category-name').value = '';
-                    this.resetIconSelection();
-                });
-                
-                // 取消添加分类
-                document.getElementById('cancel-category').addEventListener('click', () => {
-                    document.getElementById('category-modal').classList.add('hidden');
-                });
-                
-                // 图标选择
-                document.querySelectorAll('.icon-option').forEach(option => {
-                    option.addEventListener('click', (e) => {
-                        this.resetIconSelection();
-                        e.currentTarget.classList.add('bg-primary/20', 'ring-2', 'ring-primary');
-                        document.getElementById('selected-icon').value = e.currentTarget.dataset.icon;
-                    });
-                });
-                
-                // 添加分类表单提交
-                document.getElementById('add-category-form').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    
-                    const newCategory = {
-                        name: document.getElementById('new-category-name').value,
-                        icon: document.getElementById('selected-icon').value
-                    };
-                    
-                    DataModel.addCategory(newCategory);
-                    this.renderCategories();
-                    document.getElementById('category-modal').classList.add('hidden');
-                    this.showToast('分类添加成功！');
-                });
-                
-                // 删除分类
-                document.getElementById('categories-container').addEventListener('click', (e) => {
-                    if (e.target.closest('.delete-category')) {
-                        const id = parseInt(e.target.closest('.delete-category').dataset.id);
-                        if (confirm('确定要删除这个分类吗？该分类下的所有记录也会被删除。')) {
-                            DataModel.deleteCategory(id);
-                            this.renderCategories();
-                            this.renderHistory();
-                            this.renderStatistics();
-                            this.updateSummaryStats();
-                            this.showToast('分类已删除');
-                        }
-                    }
-                });
-                
-                // 统计周期切换
-                document.querySelectorAll('.period-btn').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        document.querySelectorAll('.period-btn').forEach(btn => {
-                            btn.classList.remove('bg-primary', 'text-white');
-                            btn.classList.add('bg-gray-200', 'hover:bg-gray-300');
-                        });
-                        
-                        e.currentTarget.classList.remove('bg-gray-200', 'hover:bg-gray-300');
-                        e.currentTarget.classList.add('bg-primary', 'text-white');
-                        
-                        // 显示或隐藏月份选择器
-                        const isMonthly = e.currentTarget.dataset.period === 'month';
-                        document.getElementById('month-select-container').classList.toggle('hidden', !isMonthly);
-                        
-                        this.renderStatistics();
-                    });
-                });
-                
-                // 统计筛选器变化
-                document.getElementById('stats-year').addEventListener('change', () => {
-                    this.renderStatistics();
-                });
-                
-                document.getElementById('stats-month').addEventListener('change', () => {
-                    this.renderStatistics();
-                });
-                
-                document.getElementById('category-filter').addEventListener('change', () => {
-                    this.renderStatistics();
-                });
-                
-                // 历史记录筛选
-                document.querySelectorAll('.history-filter-btn').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        document.querySelectorAll('.history-filter-btn').forEach(btn => {
-                            btn.classList.remove('bg-primary', 'text-white');
-                            btn.classList.add('bg-gray-200', 'hover:bg-gray-300');
-                        });
-                        
-                        e.currentTarget.classList.remove('bg-gray-200', 'hover:bg-gray-300');
-                        e.currentTarget.classList.add('bg-primary', 'text-white');
-                        
-                        const filter = e.currentTarget.dataset.filter;
-                        this.renderHistory(filter !== 'all' ? { period: filter } : {});
-                    });
-                });
-                
-                // 历史记录搜索
-                document.getElementById('search-history').addEventListener('input', (e) => {
-                    const searchTerm = e.target.value.trim();
-                    this.renderHistory(searchTerm ? { search: searchTerm } : {});
-                });
-                
-                // 取消编辑
-                document.getElementById('cancel-edit').addEventListener('click', () => {
-                    document.getElementById('edit-modal').classList.add('hidden');
-                });
-                
-                // 提交编辑
-                document.getElementById('edit-form').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    
-                    const id = parseInt(document.getElementById('edit-id').value);
-                    const updatedData = {
-                        amount: parseFloat(document.getElementById('edit-amount').value),
-                        categoryId: parseInt(document.getElementById('edit-category').value),
-                        description: document.getElementById('edit-description').value,
-                        date: document.getElementById('edit-date').value
-                    };
-                    
-                    DataModel.updateRecord(id, updatedData);
-                    this.renderHistory();
-                    this.renderStatistics();
-                    this.updateSummaryStats();
-                    this.populateYearSelector();
-                    
-                    document.getElementById('edit-modal').classList.add('hidden');
-                    this.showToast('记录已更新');
-                });
-                
-                // 取消删除
-                document.getElementById('cancel-delete').addEventListener('click', () => {
-                    document.getElementById('delete-modal').classList.add('hidden');
-                });
-                
-                // 确认删除
-                document.getElementById('confirm-delete').addEventListener('click', () => {
-                    const id = parseInt(document.getElementById('delete-id').value);
-                    DataModel.deleteRecord(id);
-                    
-                    this.renderHistory();
-                    this.renderStatistics();
-                    this.updateSummaryStats();
-                    this.populateYearSelector();
-                    
-                    document.getElementById('delete-modal').classList.add('hidden');
-                    this.showToast('记录已删除');
-                });
-                
-                // 平滑滚动
-                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                    anchor.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        const targetId = this.getAttribute('href');
-                        const targetElement = document.querySelector(targetId);
-                        
-                        if (targetElement) {
-                            window.scrollTo({
-                                top: targetElement.offsetTop - 80,
-                                behavior: 'smooth'
-                            });
-                            
-                            // 关闭移动菜单
-                            document.getElementById('mobile-menu').classList.add('hidden');
-                        }
-                    });
-                });
-                
-                // 滚动时改变导航栏样式
-                window.addEventListener('scroll', () => {
-                    const header = document.querySelector('header');
-                    if (window.scrollY > 10) {
-                        header.classList.add('py-2');
-                        header.classList.remove('py-3');
-                    } else {
-                        header.classList.add('py-3');
-                        header.classList.remove('py-2');
-                    }
-                });
-            },
-            
-            // 显示登录表单
-            showLoginForm() {
-                document.getElementById('login-form').classList.remove('hidden');
-                document.getElementById('register-form').classList.add('hidden');
-                document.getElementById('show-login').classList.add('border-primary', 'text-primary');
-                document.getElementById('show-login').classList.remove('border-transparent', 'text-gray-500');
-                document.getElementById('show-register').classList.add('border-transparent', 'text-gray-500');
-                document.getElementById('show-register').classList.remove('border-primary', 'text-primary');
-            },
-            
-            // 显示注册表单
-            showRegisterForm() {
-                document.getElementById('login-form').classList.add('hidden');
-                document.getElementById('register-form').classList.remove('hidden');
-                document.getElementById('show-register').classList.add('border-primary', 'text-primary');
-                document.getElementById('show-register').classList.remove('border-transparent', 'text-gray-500');
-                document.getElementById('show-login').classList.add('border-transparent', 'text-gray-500');
-                document.getElementById('show-login').classList.remove('border-primary', 'text-primary');
-            },
-            
-            // 重置图标选择状态
-            resetIconSelection() {
-                document.querySelectorAll('.icon-option').forEach(option => {
-                    option.classList.remove('bg-primary/20', 'ring-2', 'ring-primary');
-                });
-                // 默认选中第一个图标
-                const firstIcon = document.querySelector('.icon-option');
-                if (firstIcon) {
-                    firstIcon.classList.add('bg-primary/20', 'ring-2', 'ring-primary');
-                    document.getElementById('selected-icon').value = firstIcon.dataset.icon;
-                }
             }
-        };
 
-        // 初始化应用
-        document.addEventListener('DOMContentLoaded', () => {
-            DataModel.init();
-            UIController.init();
+            // 初始化分类统计图表
+            async function initCategoryStatsChart(period) {
+                const ctx = document.getElementById('category-stats-chart').getContext('2d');
+                const today = new Date();
+                let stats, title, params = {};
+                
+                if (period === 'month') {
+                    params = { month: today.getMonth() + 1, year: today.getFullYear() };
+                    title = '本月分类支出统计';
+                } else if (period === 'year') {
+                    params = { year: today.getFullYear() };
+                    title = '本年分类支出统计';
+                } else {
+                    params = {};
+                    title = '所有时间分类支出统计';
+                }
+                
+                stats = await API.Statistics.getCategoryStats(params);
+                
+                // 销毁已存在的图表
+                if (window.categoryStatsChart) {
+                    window.categoryStatsChart.destroy();
+                }
+                
+                // 如果没有数据
+                if (stats.stats.length === 0) {
+                    window.categoryStatsChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['暂无数据'],
+                            datasets: [{
+                                label: '支出金额',
+                                data: [0],
+                                backgroundColor: 'rgba(79, 70, 229, 0.6)'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return '¥' + value;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    // 更新分类详情
+                    document.getElementById('category-details').innerHTML = '<tr><td colspan="5" class="py-8 text-center text-gray-500">暂无数据</td></tr>';
+                    return;
+                }
+                
+                // 准备图表数据
+                const labels = stats.stats.map(item => item.category.name);
+                const data = stats.stats.map(item => item.total);
+                
+                // 创建图表
+                window.categoryStatsChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '支出金额',
+                            data: data,
+                            backgroundColor: 'rgba(79, 70, 229, 0.6)',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return formatCurrency(context.raw);
+                                    }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: title,
+                                font: {
+                                    size: 16
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '¥' + value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // 更新分类详情
+                const categoryDetailsEl = document.getElementById('category-details');
+                categoryDetailsEl.innerHTML = '';
+                
+                stats.stats.forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="py-3 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <i class="fa ${item.category.icon} text-primary mr-2"></i>
+                                ${item.category.name}
+                            </div>
+                        </td>
+                        <td class="py-3 whitespace-nowrap font-medium">${formatCurrency(item.total)}</td>
+                        <td class="py-3 whitespace-nowrap">${item.count} 条</td>
+                        <td class="py-3 whitespace-nowrap">${formatCurrency(item.total / item.count)}</td>
+                        <td class="py-3 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="w-24 bg-gray-200 rounded-full h-2 mr-2">
+                                    <div class="bg-primary h-2 rounded-full" style="width: ${item.percentage}%"></div>
+                                </div>
+                                <span class="text-sm">${item.percentage.toFixed(1)}%</span>
+                            </div>
+                        </td>
+                    `;
+                    categoryDetailsEl.appendChild(tr);
+                });
+            }
+
+            // 初始化月度趋势图表
+            async function initMonthlyTrendChart(year) {
+                const ctx = document.getElementById('monthly-trend-chart').getContext('2d');
+                const stats = await API.Statistics.getTrendStats({ period_type: 'month', year: year });
+                
+                // 销毁已存在的图表
+                if (window.monthlyTrendChart) {
+                    window.monthlyTrendChart.destroy();
+                }
+                
+                // 准备图表数据
+                const labels = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+                const data = stats.data;
+                
+                // 创建图表
+                window.monthlyTrendChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '月度支出',
+                            data: data,
+                            backgroundColor: 'rgba(236, 72, 153, 0.6)',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return formatCurrency(context.raw);
+                                    }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: `${year}年支出趋势`,
+                                font: {
+                                    size: 16
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '¥' + value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
         });
     </script>
 </body>
