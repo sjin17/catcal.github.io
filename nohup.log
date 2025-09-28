@@ -7,3 +7,34 @@ nohup: ignoring input
  * Restarting with stat
  * Debugger is active!
  * Debugger PIN: 257-829-621
+127.0.0.1 - - [28/Sep/2025 23:22:42] "OPTIONS /catcal/api/auth/register HTTP/1.0" 200 -
+/root/github/catcal.github.io/app.py:132: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  'exp': dt.datetime.utcnow() + dt.timedelta(days=30)
+127.0.0.1 - - [28/Sep/2025 23:22:42] "[35m[1mPOST /catcal/api/auth/register HTTP/1.0[0m" 201 -
+127.0.0.1 - - [28/Sep/2025 23:22:42] "OPTIONS /catcal/api/categories HTTP/1.0" 200 -
+127.0.0.1 - - [28/Sep/2025 23:22:43] "GET /catcal/api/categories HTTP/1.0" 200 -
+127.0.0.1 - - [28/Sep/2025 23:22:43] "OPTIONS /catcal/api/records HTTP/1.0" 200 -
+127.0.0.1 - - [28/Sep/2025 23:22:43] "GET /catcal/api/records HTTP/1.0" 200 -
+127.0.0.1 - - [28/Sep/2025 23:22:43] "OPTIONS /catcal/api/statistics/categories?month=9&year=2025 HTTP/1.0" 200 -
+/root/github/catcal.github.io/app.py:412: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  year = request.args.get('year', type=int, default=datetime.utcnow().year)
+127.0.0.1 - - [28/Sep/2025 23:22:43] "GET /catcal/api/statistics/categories?month=9&year=2025 HTTP/1.0" 200 -
+127.0.0.1 - - [28/Sep/2025 23:22:43] "OPTIONS /catcal/api/statistics/categories?month=8&year=2025 HTTP/1.0" 200 -
+127.0.0.1 - - [28/Sep/2025 23:22:43] "GET /catcal/api/statistics/categories?month=8&year=2025 HTTP/1.0" 200 -
+127.0.0.1 - - [28/Sep/2025 23:22:43] "OPTIONS /catcal/api/records?month=9&year=2025 HTTP/1.0" 200 -
+127.0.0.1 - - [28/Sep/2025 23:22:43] "GET /catcal/api/records?month=9&year=2025 HTTP/1.0" 200 -
+127.0.0.1 - - [28/Sep/2025 23:22:44] "OPTIONS /catcal/api/records?month=8&year=2025 HTTP/1.0" 200 -
+127.0.0.1 - - [28/Sep/2025 23:22:44] "GET /catcal/api/records?month=8&year=2025 HTTP/1.0" 200 -
+127.0.0.1 - - [28/Sep/2025 23:22:44] "GET /catcal/api/records HTTP/1.0" 200 -
+127.0.0.1 - - [28/Sep/2025 23:22:44] "[33mOPTIONS /catcal/api/statistics/trends?period_type=day&year=2025&month=9 HTTP/1.0[0m" 404 -
+127.0.0.1 - - [28/Sep/2025 23:22:44] "GET /catcal/api/statistics/categories?month=9&year=2025 HTTP/1.0" 200 -
+127.0.0.1 - - [28/Sep/2025 23:22:44] "[33mOPTIONS /catcal/api/statistics/trends?period_type=month&year=2025 HTTP/1.0[0m" 404 -
+127.0.0.1 - - [28/Sep/2025 23:22:44] "GET /catcal/api/statistics/categories?month=9&year=2025 HTTP/1.0" 200 -
+127.0.0.1 - - [28/Sep/2025 23:23:17] "OPTIONS /catcal/api/records HTTP/1.0" 200 -
+127.0.0.1 - - [28/Sep/2025 23:23:17] "[31m[1mPOST /catcal/api/records HTTP/1.0[0m" 405 -
+127.0.0.1 - - [28/Sep/2025 23:23:33] "OPTIONS /catcal/api/records HTTP/1.0" 200 -
+127.0.0.1 - - [28/Sep/2025 23:23:33] "[31m[1mPOST /catcal/api/records HTTP/1.0[0m" 405 -
+ * Detected change in '/root/github/catcal.github.io/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 257-829-621

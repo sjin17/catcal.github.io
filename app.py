@@ -145,7 +145,7 @@ def register():
         db.session.rollback()
         return jsonify({'message': '注册失败', 'error': str(e)}), 500
 
-@app.route('/api/auth/login', methods=['POST'])
+@app.route('/catcal/api/auth/login', methods=['POST'])
 def login():
     """用户登录接口 - 前端登录表单提交到此接口"""
     data = request.get_json()
@@ -306,7 +306,7 @@ def get_records(current_user):
         'category_icon': r.category.icon
     } for r in records]), 200
 
-@app.route('/api/records', methods=['POST'])
+@app.route('/catcal/api/records', methods=['POST'])
 @token_required
 def add_record(current_user):
     """添加新支出记录 - 前端添加记录表单提交到此接口"""
@@ -462,7 +462,7 @@ def get_category_stats(current_user):
         'total': float(total)
     }), 200
 
-@app.route('/api/statistics/trends', methods=['GET'])
+@app.route('/catcal/api/statistics/trends', methods=['GET'])
 @token_required
 def get_trend_stats(current_user):
     """获取趋势统计数据 - 前端生成趋势图表时调用此接口"""
