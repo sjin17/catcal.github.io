@@ -45,6 +45,11 @@
             .rotate-cat-reverse {
                 transform: rotate(5deg);
             }
+            .error-message {
+                color: #dc2626;
+                font-size: 0.875rem;
+                margin-top: 0.25rem;
+            }
         }
     </style>
 </head>
@@ -86,19 +91,26 @@
             <!-- 注册表单 (默认隐藏) -->
             <form id="register-form" class="space-y-4 hidden">
                 <div>
-                    <label for="register-username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+                    <label for="register-username" class="block text-sm font-medium text-gray-700 mb-1">
+                        用户名 <span class="text-red-500">*</span>
+                    </label>
                     <input type="text" id="register-username" required
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                    <div id="username-error" class="error-message hidden">该用户名已被注册</div>
                 </div>
                 
                 <div>
-                    <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                    <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">
+                        密码 <span class="text-red-500">*</span>
+                    </label>
                     <input type="password" id="register-password" required minlength="6"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
                 </div>
                 
                 <div>
-                    <label for="register-confirm" class="block text-sm font-medium text-gray-700 mb-1">确认密码</label>
+                    <label for="register-confirm" class="block text-sm font-medium text-gray-700 mb-1">
+                        确认密码 <span class="text-red-500">*</span>
+                    </label>
                     <input type="password" id="register-confirm" required
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
                 </div>
@@ -646,12 +658,18 @@
                 }
             },
             
+            // 检查用户名是否已存在
+            isUsernameExists(username) {
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                return users.some(user => user.username === username);
+            },
+            
             // 注册新用户
             register(username, password) {
                 const users = JSON.parse(localStorage.getItem('users') || '[]');
                 
                 // 检查用户名是否已存在
-                if (users.some(user => user.username === username)) {
+                if (this.isUsernameExists(username)) {
                     return { success: false, message: '用户名已存在' };
                 }
                 
@@ -1451,6 +1469,12 @@
                     const password = document.getElementById('register-password').value;
                     const confirm = document.getElementById('register-confirm').value;
                     
+                    // 检查用户名是否已存在
+                    if (AuthService.isUsernameExists(username)) {
+                        document.getElementById('username-error').classList.remove('hidden');
+                        return;
+                    }
+                    
                     if (password !== confirm) {
                         alert('两次输入的密码不一致');
                         return;
@@ -1458,12 +1482,29 @@
                     
                     const result = AuthService.register(username, password);
                     if (result.success) {
-                        this.showLoginForm();
-                        document.getElementById('login-username').value = username;
-                        document.getElementById('login-password').value = password;
-                        this.showToast(result.message);
+                        // 注册成功后自动登录
+                        AuthService.login(username, password);
+                        this.showApp();
+                        this.updateUserDisplay();
+                        this.renderHistory();
+                        this.renderStatistics();
+                        this.updateSummaryStats();
+                        this.populateYearSelector();
+                        this.showToast('注册并登录成功！');
                     } else {
                         alert(result.message);
+                    }
+                });
+                
+                // 实时检查用户名是否已存在
+                document.getElementById('register-username').addEventListener('input', (e) => {
+                    const username = e.target.value.trim();
+                    const errorElement = document.getElementById('username-error');
+                    
+                    if (username && AuthService.isUsernameExists(username)) {
+                        errorElement.classList.remove('hidden');
+                    } else {
+                        errorElement.classList.add('hidden');
                     }
                 });
                 
