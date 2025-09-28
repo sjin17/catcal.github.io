@@ -6,9 +6,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 import datetime as dt
 from functools import wraps
+from flask_cors import CORS
 
 # 初始化Flask应用
 app = Flask(__name__)
+CORS(app)  # 这将允许所有来源访问所有路由
 
 # 配置数据库 - 使用SQLite作为示例，实际部署可更换为MySQL等
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cat_account_book.db'
