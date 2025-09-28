@@ -6,7 +6,7 @@
     <title>猫咪记账本</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script src="https://cdncdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
     <script>
         // Tailwind 配置
         tailwind.config = {
@@ -552,7 +552,7 @@
 
     <script>
         // API服务封装 - 所有接口请求都通过这里发送
-        const API_BASE_URL = 'https://qisimiaoxiang.site/api';
+        const API_BASE_URL = 'https://qisimiaoxiang.site/catcal/api';
 
         // 工具函数：处理请求头（添加认证token）
         const getAuthHeaders = () => {
@@ -569,150 +569,153 @@
             return headers;
         };
 
-        // 认证相关接口
-        export const AuthAPI = {
-            // 用户注册 - 对应后端接口：https://qisimiaoxiang.site/api/auth/register
-            register: async (username, password) => {
-                const response = await fetch(`${API_BASE_URL}/auth/register`, {
-                    method: 'POST',
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify({ username, password })
-                });
-                return response.json();
-            },
-            
-            // 用户登录 - 对应后端接口：https://qisimiaoxiang.site/api/auth/login
-            login: async (username, password) => {
-                const response = await fetch(`${API_BASE_URL}/auth/login`, {
-                    method: 'POST',
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify({ username, password })
-                });
-                return response.json();
-            },
-            
-            // 获取当前用户信息 - 对应后端接口：https://qisimiaoxiang.site/api/auth/me
-            getCurrentUser: async () => {
-                const response = await fetch(`${API_BASE_URL}/auth/me`, {
-                    method: 'GET',
-                    headers: getAuthHeaders()
-                });
-                return response.json();
-            }
-        };
-
-        // 分类相关接口
-        export const CategoryAPI = {
-            // 获取所有分类 - 对应后端接口：https://qisimiaoxiang.site/api/categories
-            getAll: async () => {
-                const response = await fetch(`${API_BASE_URL}/categories`, {
-                    method: 'GET',
-                    headers: getAuthHeaders()
-                });
-                return response.json();
-            },
-            
-            // 添加新分类 - 对应后端接口：https://qisimiaoxiang.site/api/categories
-            add: async (category) => {
-                const response = await fetch(`${API_BASE_URL}/categories`, {
-                    method: 'POST',
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify(category)
-                });
-                return response.json();
-            },
-            
-            // 删除分类 - 对应后端接口：https://qisimiaoxiang.site/api/categories/[ID]
-            delete: async (categoryId) => {
-                const response = await fetch(`${API_BASE_URL}/categories/${categoryId}`, {
-                    method: 'DELETE',
-                    headers: getAuthHeaders()
-                });
-                return response.json();
-            }
-        };
-
-        // 支出记录相关接口
-        export const RecordAPI = {
-            // 获取记录列表（支持筛选）- 对应后端接口：https://qisimiaoxiang.site/api/records
-            getRecords: async (params = {}) => {
-                // 构建查询参数
-                const queryParams = new URLSearchParams();
-                Object.entries(params).forEach(([key, value]) => {
-                    if (value !== undefined && value !== null) {
-                        queryParams.append(key, value);
-                    }
-                });
+        // API对象封装（替代原来的export方式）
+        const API = {
+            // 认证相关接口
+            Auth: {
+                // 用户注册 - 对应后端接口：https://qisimiaoxiang.site/api/auth/register
+                register: async (username, password) => {
+                    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify({ username, password })
+                    });
+                    return response.json();
+                },
                 
-                const response = await fetch(`${API_BASE_URL}/records?${queryParams.toString()}`, {
-                    method: 'GET',
-                    headers: getAuthHeaders()
-                });
-                return response.json();
-            },
-            
-            // 添加新记录 - 对应后端接口：https://qisimiaoxiang.site/api/records
-            addRecord: async (record) => {
-                const response = await fetch(`${API_BASE_URL}/records`, {
-                    method: 'POST',
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify(record)
-                });
-                return response.json();
-            },
-            
-            // 更新记录 - 对应后端接口：https://qisimiaoxiang.site/api/records/[ID]
-            updateRecord: async (recordId, record) => {
-                const response = await fetch(`${API_BASE_URL}/records/${recordId}`, {
-                    method: 'PUT',
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify(record)
-                });
-                return response.json();
-            },
-            
-            // 删除记录 - 对应后端接口：https://qisimiaoxiang.site/api/records/[ID]
-            deleteRecord: async (recordId) => {
-                const response = await fetch(`${API_BASE_URL}/records/${recordId}`, {
-                    method: 'DELETE',
-                    headers: getAuthHeaders()
-                });
-                return response.json();
-            }
-        };
-
-        // 统计相关接口
-        export const StatisticsAPI = {
-            // 分类统计 - 对应后端接口：https://qisimiaoxiang.site/api/statistics/categories
-            getCategoryStats: async (params = {}) => {
-                const queryParams = new URLSearchParams();
-                Object.entries(params).forEach(([key, value]) => {
-                    if (value !== undefined && value !== null) {
-                        queryParams.append(key, value);
-                    }
-                });
+                // 用户登录 - 对应后端接口：https://qisimiaoxiang.site/api/auth/login
+                login: async (username, password) => {
+                    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify({ username, password })
+                    });
+                    return response.json();
+                },
                 
-                const response = await fetch(`${API_BASE_URL}/statistics/categories?${queryParams.toString()}`, {
-                    method: 'GET',
-                    headers: getAuthHeaders()
-                });
-                return response.json();
+                // 获取当前用户信息 - 对应后端接口：https://qisimiaoxiang.site/api/auth/me
+                getCurrentUser: async () => {
+                    const response = await fetch(`${API_BASE_URL}/auth/me`, {
+                        method: 'GET',
+                        headers: getAuthHeaders()
+                    });
+                    return response.json();
+                }
             },
             
-            // 趋势统计 - 对应后端接口：https://qisimiaoxiang.site/api/statistics/trends
-            getTrendStats: async (params = {}) => {
-                const queryParams = new URLSearchParams();
-                Object.entries(params).forEach(([key, value]) => {
-                    if (value !== undefined && value !== null) {
-                        queryParams.append(key, value);
-                    }
-                });
+            // 分类相关接口
+            Category: {
+                // 获取所有分类 - 对应后端接口：https://qisimiaoxiang.site/api/categories
+                getAll: async () => {
+                    const response = await fetch(`${API_BASE_URL}/categories`, {
+                        method: 'GET',
+                        headers: getAuthHeaders()
+                    });
+                    return response.json();
+                },
                 
-                const response = await fetch(`${API_BASE_URL}/statistics/trends?${queryParams.toString()}`, {
-                    method: 'GET',
-                    headers: getAuthHeaders()
-                });
-                return response.json();
+                // 添加新分类 - 对应后端接口：https://qisimiaoxiang.site/api/categories
+                add: async (category) => {
+                    const response = await fetch(`${API_BASE_URL}/categories`, {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify(category)
+                    });
+                    return response.json();
+                },
+                
+                // 删除分类 - 对应后端接口：https://qisimiaoxiang.site/api/categories/[ID]
+                delete: async (categoryId) => {
+                    const response = await fetch(`${API_BASE_URL}/categories/${categoryId}`, {
+                        method: 'DELETE',
+                        headers: getAuthHeaders()
+                    });
+                    return response.json();
+                }
+            },
+            
+            // 支出记录相关接口
+            Record: {
+                // 获取记录列表（支持筛选）- 对应后端接口：https://qisimiaoxiang.site/api/records
+                getRecords: async (params = {}) => {
+                    // 构建查询参数
+                    const queryParams = new URLSearchParams();
+                    Object.entries(params).forEach(([key, value]) => {
+                        if (value !== undefined && value !== null) {
+                            queryParams.append(key, value);
+                        }
+                    });
+                    
+                    const response = await fetch(`${API_BASE_URL}/records?${queryParams.toString()}`, {
+                        method: 'GET',
+                        headers: getAuthHeaders()
+                    });
+                    return response.json();
+                },
+                
+                // 添加新记录 - 对应后端接口：https://qisimiaoxiang.site/api/records
+                addRecord: async (record) => {
+                    const response = await fetch(`${API_BASE_URL}/records`, {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify(record)
+                    });
+                    return response.json();
+                },
+                
+                // 更新记录 - 对应后端接口：https://qisimiaoxiang.site/api/records/[ID]
+                updateRecord: async (recordId, record) => {
+                    const response = await fetch(`${API_BASE_URL}/records/${recordId}`, {
+                        method: 'PUT',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify(record)
+                    });
+                    return response.json();
+                },
+                
+                // 删除记录 - 对应后端接口：https://qisimiaoxiang.site/api/records/[ID]
+                deleteRecord: async (recordId) => {
+                    const response = await fetch(`${API_BASE_URL}/records/${recordId}`, {
+                        method: 'DELETE',
+                        headers: getAuthHeaders()
+                    });
+                    return response.json();
+                }
+            },
+            
+            // 统计相关接口
+            Statistics: {
+                // 分类统计 - 对应后端接口：https://qisimiaoxiang.site/api/statistics/categories
+                getCategoryStats: async (params = {}) => {
+                    const queryParams = new URLSearchParams();
+                    Object.entries(params).forEach(([key, value]) => {
+                        if (value !== undefined && value !== null) {
+                            queryParams.append(key, value);
+                        }
+                    });
+                    
+                    const response = await fetch(`${API_BASE_URL}/statistics/categories?${queryParams.toString()}`, {
+                        method: 'GET',
+                        headers: getAuthHeaders()
+                    });
+                    return response.json();
+                },
+                
+                // 趋势统计 - 对应后端接口：https://qisimiaoxiang.site/api/statistics/trends
+                getTrendStats: async (params = {}) => {
+                    const queryParams = new URLSearchParams();
+                    Object.entries(params).forEach(([key, value]) => {
+                        if (value !== undefined && value !== null) {
+                            queryParams.append(key, value);
+                        }
+                    });
+                    
+                    const response = await fetch(`${API_BASE_URL}/statistics/trends?${queryParams.toString()}`, {
+                        method: 'GET',
+                        headers: getAuthHeaders()
+                    });
+                    return response.json();
+                }
             }
         };
 
@@ -753,7 +756,7 @@
             if (currentUser.token) {
                 try {
                     // 验证token有效性
-                    const userData = await AuthAPI.getCurrentUser();
+                    const userData = await API.Auth.getCurrentUser();
                     if (userData.id) {
                         // 已登录，显示主应用
                         document.getElementById('auth-page').classList.add('hidden');
@@ -804,7 +807,7 @@
                 }
                 
                 try {
-                    const result = await AuthAPI.register(username, password);
+                    const result = await API.Auth.register(username, password);
                     if (result.token) {
                         // 注册成功，保存用户信息
                         localStorage.setItem('currentUser', JSON.stringify({
@@ -845,7 +848,7 @@
                 }
                 
                 try {
-                    const result = await AuthAPI.login(username, password);
+                    const result = await API.Auth.login(username, password);
                     if (result.token) {
                         // 登录成功，保存用户信息
                         localStorage.setItem('currentUser', JSON.stringify({
@@ -945,7 +948,7 @@
             // 加载分类数据
             async function loadCategories() {
                 try {
-                    const categories = await CategoryAPI.getAll();
+                    const categories = await API.Category.getAll();
                     
                     // 更新分类计数
                     document.getElementById('category-count').textContent = `${categories.length} 个`;
@@ -1042,7 +1045,7 @@
                 }
                 
                 try {
-                    const result = await CategoryAPI.add({ name, icon });
+                    const result = await API.Category.add({ name, icon });
                     if (result.category) {
                         showToast('分类添加成功');
                         // 清空表单
@@ -1063,7 +1066,7 @@
             // 加载记录数据
             async function loadRecords(params = {}) {
                 try {
-                    const records = await RecordAPI.getRecords(params);
+                    const records = await API.Record.getRecords(params);
                     
                     // 更新记录计数
                     document.getElementById('records-total-count').textContent = records.length;
@@ -1198,7 +1201,7 @@
                 }
                 
                 try {
-                    const result = await RecordAPI.addRecord({
+                    const result = await API.Record.addRecord({
                         amount,
                         category_id: categoryId,
                         date,
@@ -1246,7 +1249,7 @@
                 }
                 
                 try {
-                    const result = await RecordAPI.updateRecord(recordId, {
+                    const result = await API.Record.updateRecord(recordId, {
                         amount,
                         category_id: categoryId,
                         date,
@@ -1283,7 +1286,7 @@
                 try {
                     if (recordId) {
                         // 删除记录
-                        const result = await RecordAPI.deleteRecord(recordId);
+                        const result = await API.Record.deleteRecord(recordId);
                         if (result.message) {
                             showToast('记录已删除');
                             // 重新加载记录
@@ -1295,7 +1298,7 @@
                         }
                     } else if (categoryId) {
                         // 删除分类
-                        const result = await CategoryAPI.delete(categoryId);
+                        const result = await API.Category.delete(categoryId);
                         if (result.message) {
                             showToast('分类已删除');
                             // 重新加载分类
@@ -1356,13 +1359,13 @@
                     const currentYear = today.getFullYear();
                     
                     // 获取本月统计
-                    const monthlyStats = await StatisticsAPI.getCategoryStats({ month: currentMonth, year: currentYear });
+                    const monthlyStats = await API.Statistics.getCategoryStats({ month: currentMonth, year: currentYear });
                     document.getElementById('monthly-total').textContent = formatCurrency(monthlyStats.total || 0);
                     
                     // 获取上月统计
                     const lastMonth = currentMonth === 1 ? 12 : currentMonth - 1;
                     const lastYear = currentMonth === 1 ? currentYear - 1 : currentYear;
-                    const lastMonthStats = await StatisticsAPI.getCategoryStats({ month: lastMonth, year: lastYear });
+                    const lastMonthStats = await API.Statistics.getCategoryStats({ month: lastMonth, year: lastYear });
                     
                     // 计算月度变化
                     const monthlyChangeEl = document.getElementById('monthly-change');
@@ -1381,11 +1384,11 @@
                     }
                     
                     // 获取本月记录数
-                    const monthlyRecords = await RecordAPI.getRecords({ month: currentMonth, year: currentYear });
+                    const monthlyRecords = await API.Record.getRecords({ month: currentMonth, year: currentYear });
                     document.getElementById('monthly-count').textContent = `${monthlyRecords.length} 条`;
                     
                     // 获取上月记录数
-                    const lastMonthRecords = await RecordAPI.getRecords({ month: lastMonth, year: lastYear });
+                    const lastMonthRecords = await API.Record.getRecords({ month: lastMonth, year: lastYear });
                     
                     // 计算记录数变化
                     const recordChangeEl = document.getElementById('record-change');
@@ -1404,7 +1407,7 @@
                     }
                     
                     // 加载所有记录用于统计
-                    const allRecords = await RecordAPI.getRecords();
+                    const allRecords = await API.Record.getRecords();
                     
                     // 计算总支出
                     const totalExpense = allRecords.reduce((sum, record) => sum + parseFloat(record.amount), 0);
@@ -1510,17 +1513,17 @@
                     // 本周
                     const weekStart = new Date(today);
                     weekStart.setDate(today.getDate() - today.getDay());
-                    stats = await StatisticsAPI.getTrendStats({ period_type: 'day', year: today.getFullYear(), month: today.getMonth() + 1 });
+                    stats = await API.Statistics.getTrendStats({ period_type: 'day', year: today.getFullYear(), month: today.getMonth() + 1 });
                     labels = stats.labels.map(day => `周${['日', '一', '二', '三', '四', '五', '六'][new Date(today.getFullYear(), today.getMonth(), day).getDay()]}`);
                     title = '本周支出趋势';
                 } else if (period === 'month') {
                     // 本月
-                    stats = await StatisticsAPI.getTrendStats({ period_type: 'day', year: today.getFullYear(), month: today.getMonth() + 1 });
+                    stats = await API.Statistics.getTrendStats({ period_type: 'day', year: today.getFullYear(), month: today.getMonth() + 1 });
                     labels = stats.labels.map(day => `${day}日`);
                     title = '本月支出趋势';
                 } else {
                     // 本年
-                    stats = await StatisticsAPI.getTrendStats({ period_type: 'month', year: today.getFullYear() });
+                    stats = await API.Statistics.getTrendStats({ period_type: 'month', year: today.getFullYear() });
                     labels = stats.labels.map(month => `${month}月`);
                     title = '本年支出趋势';
                 }
@@ -1588,7 +1591,7 @@
             async function initCategoryChart() {
                 const ctx = document.getElementById('category-chart').getContext('2d');
                 const today = new Date();
-                const stats = await StatisticsAPI.getCategoryStats({ month: today.getMonth() + 1, year: today.getFullYear() });
+                const stats = await API.Statistics.getCategoryStats({ month: today.getMonth() + 1, year: today.getFullYear() });
                 
                 // 销毁已存在的图表
                 if (window.categoryChart) {
@@ -1690,7 +1693,7 @@
                     title = '所有时间分类支出统计';
                 }
                 
-                stats = await StatisticsAPI.getCategoryStats(params);
+                stats = await API.Statistics.getCategoryStats(params);
                 
                 // 销毁已存在的图表
                 if (window.categoryStatsChart) {
@@ -1818,7 +1821,7 @@
             // 初始化月度趋势图表
             async function initMonthlyTrendChart(year) {
                 const ctx = document.getElementById('monthly-trend-chart').getContext('2d');
-                const stats = await StatisticsAPI.getTrendStats({ period_type: 'month', year: year });
+                const stats = await API.Statistics.getTrendStats({ period_type: 'month', year: year });
                 
                 // 销毁已存在的图表
                 if (window.monthlyTrendChart) {
@@ -1880,4 +1883,3 @@
     </script>
 </body>
 </html>
-    
