@@ -49,32 +49,100 @@
     </style>
 </head>
 <body class="bg-light font-cat text-dark min-h-screen flex flex-col">
+    <!-- 登录模态框 -->
+    <div id="login-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 w-full max-w-md mx-4 cat-shadow rotate-cat">
+            <div class="flex justify-center mb-6">
+                <div class="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center">
+                    <i class="fa fa-paw text-primary text-3xl"></i>
+                </div>
+            </div>
+            <h2 class="text-2xl font-bold text-center mb-6">猫咪记账本登录</h2>
+            
+            <div class="mb-4">
+                <button id="show-login" class="w-full py-2 mb-2 border-b-2 border-primary text-primary font-medium">登录</button>
+                <button id="show-register" class="w-full py-2 mb-2 border-b-2 border-transparent text-gray-500 hover:text-primary transition-colors">注册</button>
+            </div>
+            
+            <!-- 登录表单 -->
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label for="login-username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+                    <input type="text" id="login-username" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                </div>
+                
+                <div>
+                    <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                    <input type="password" id="login-password" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                </div>
+                
+                <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white py-3 rounded-lg transition-colors flex items-center justify-center">
+                    <i class="fa fa-sign-in mr-2"></i> 登录
+                </button>
+            </form>
+            
+            <!-- 注册表单 (默认隐藏) -->
+            <form id="register-form" class="space-y-4 hidden">
+                <div>
+                    <label for="register-username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+                    <input type="text" id="register-username" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                </div>
+                
+                <div>
+                    <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                    <input type="password" id="register-password" required minlength="6"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                </div>
+                
+                <div>
+                    <label for="register-confirm" class="block text-sm font-medium text-gray-700 mb-1">确认密码</label>
+                    <input type="password" id="register-confirm" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                </div>
+                
+                <button type="submit" class="w-full bg-secondary hover:bg-secondary/90 text-dark py-3 rounded-lg transition-colors flex items-center justify-center">
+                    <i class="fa fa-user-plus mr-2"></i> 注册
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- 顶部导航栏 -->
-    <header class="bg-white shadow-md sticky top-0 z-50 transition-all duration-300">
+    <header class="bg-white shadow-md sticky top-0 z-40 transition-all duration-300">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-2">
                 <i class="fa fa-paw text-primary text-3xl"></i>
                 <h1 class="text-2xl font-bold text-primary">猫咪记账本</h1>
             </div>
             
-            <nav class="hidden md:flex space-x-6">
-                <a href="#record" class="nav-link hover:text-primary transition-colors flex items-center">
-                    <i class="fa fa-plus-circle mr-1"></i> 记账
-                </a>
-                <a href="#categories" class="nav-link hover:text-primary transition-colors flex items-center">
-                    <i class="fa fa-tags mr-1"></i> 分类
-                </a>
-                <a href="#statistics" class="nav-link hover:text-primary transition-colors flex items-center">
-                    <i class="fa fa-bar-chart mr-1"></i> 统计
-                </a>
-                <a href="#history" class="nav-link hover:text-primary transition-colors flex items-center">
-                    <i class="fa fa-history mr-1"></i> 历史
-                </a>
-            </nav>
-            
-            <button id="mobile-menu-button" class="md:hidden text-dark text-xl">
-                <i class="fa fa-bars"></i>
-            </button>
+            <div class="flex items-center space-x-4">
+                <span id="user-display" class="hidden md:inline-block"></span>
+                <button id="logout-btn" class="text-gray-500 hover:text-primary transition-colors hidden">
+                    <i class="fa fa-sign-out"></i>
+                </button>
+                
+                <nav class="hidden md:flex space-x-6">
+                    <a href="#record" class="nav-link hover:text-primary transition-colors flex items-center">
+                        <i class="fa fa-plus-circle mr-1"></i> 记账
+                    </a>
+                    <a href="#categories" class="nav-link hover:text-primary transition-colors flex items-center">
+                        <i class="fa fa-tags mr-1"></i> 分类
+                    </a>
+                    <a href="#statistics" class="nav-link hover:text-primary transition-colors flex items-center">
+                        <i class="fa fa-bar-chart mr-1"></i> 统计
+                    </a>
+                    <a href="#history" class="nav-link hover:text-primary transition-colors flex items-center">
+                        <i class="fa fa-history mr-1"></i> 历史
+                    </a>
+                </nav>
+                
+                <button id="mobile-menu-button" class="md:hidden text-dark text-xl">
+                    <i class="fa fa-bars"></i>
+                </button>
+            </div>
         </div>
         
         <!-- 移动端菜单 -->
@@ -92,6 +160,12 @@
                 <a href="#history" class="py-2 hover:text-primary transition-colors flex items-center">
                     <i class="fa fa-history mr-2"></i> 历史
                 </a>
+                <div class="py-2 border-t border-gray-100 flex items-center justify-between">
+                    <span id="mobile-user-display"></span>
+                    <button id="mobile-logout-btn" class="text-gray-500 hover:text-primary transition-colors">
+                        <i class="fa fa-sign-out"></i> 退出
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -103,7 +177,7 @@
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
                 <div>
                     <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold">
-                        你好，铲屎官！
+                        你好，<span id="welcome-username"></span>！
                         <span class="text-primary">🐾</span>
                     </h2>
                     <p class="text-gray-600">今天是 <span id="current-date" class="font-semibold"></span></p>
@@ -563,10 +637,77 @@
     </div>
 
     <script>
+        // 用户认证模块
+        const AuthService = {
+            // 初始化用户数据
+            init() {
+                if (!localStorage.getItem('users')) {
+                    localStorage.setItem('users', JSON.stringify([]));
+                }
+            },
+            
+            // 注册新用户
+            register(username, password) {
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                
+                // 检查用户名是否已存在
+                if (users.some(user => user.username === username)) {
+                    return { success: false, message: '用户名已存在' };
+                }
+                
+                // 创建新用户
+                const newUser = {
+                    id: Date.now(), // 使用时间戳作为简单的唯一ID
+                    username,
+                    password, // 注意：实际应用中应该加密存储密码
+                    createdAt: new Date().toISOString()
+                };
+                
+                users.push(newUser);
+                localStorage.setItem('users', JSON.stringify(users));
+                return { success: true, message: '注册成功' };
+            },
+            
+            // 用户登录
+            login(username, password) {
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                const user = users.find(u => u.username === username && u.password === password);
+                
+                if (user) {
+                    // 保存登录状态
+                    localStorage.setItem('currentUser', JSON.stringify({
+                        id: user.id,
+                        username: user.username
+                    }));
+                    return { success: true, message: '登录成功' };
+                }
+                
+                return { success: false, message: '用户名或密码错误' };
+            },
+            
+            // 用户登出
+            logout() {
+                localStorage.removeItem('currentUser');
+            },
+            
+            // 获取当前登录用户
+            getCurrentUser() {
+                const user = localStorage.getItem('currentUser');
+                return user ? JSON.parse(user) : null;
+            },
+            
+            // 检查用户是否已登录
+            isLoggedIn() {
+                return !!this.getCurrentUser();
+            }
+        };
+
         // 数据模型
         const DataModel = {
             // 初始化数据
             init() {
+                AuthService.init();
+                
                 // 检查本地存储中是否有数据，没有则初始化
                 if (!localStorage.getItem('expenseCategories')) {
                     const defaultCategories = [
@@ -584,7 +725,7 @@
                 }
             },
             
-            // 获取所有分类
+            // 获取所有分类（分类是共享的）
             getCategories() {
                 return JSON.parse(localStorage.getItem('expenseCategories') || '[]');
             },
@@ -607,51 +748,72 @@
                 const updatedCategories = categories.filter(c => c.id !== id);
                 localStorage.setItem('expenseCategories', JSON.stringify(updatedCategories));
                 
-                // 同时删除该分类下的所有记录
+                // 同时删除该分类下的所有记录（所有用户的）
                 const records = this.getRecords();
                 const updatedRecords = records.filter(r => r.categoryId !== id);
                 localStorage.setItem('expenseRecords', JSON.stringify(updatedRecords));
             },
             
-            // 获取所有记录
+            // 获取当前用户的所有记录
             getRecords() {
-                return JSON.parse(localStorage.getItem('expenseRecords') || '[]');
+                const currentUser = AuthService.getCurrentUser();
+                if (!currentUser) return [];
+                
+                const allRecords = JSON.parse(localStorage.getItem('expenseRecords') || '[]');
+                // 只返回当前用户的记录
+                return allRecords.filter(record => record.userId === currentUser.id);
             },
             
-            // 添加新记录
+            // 添加新记录（关联到当前用户）
             addRecord(record) {
-                const records = this.getRecords();
-                const newId = records.length > 0 
-                    ? Math.max(...records.map(r => r.id)) + 1 
+                const currentUser = AuthService.getCurrentUser();
+                if (!currentUser) return null;
+                
+                const allRecords = JSON.parse(localStorage.getItem('expenseRecords') || '[]');
+                const newId = allRecords.length > 0 
+                    ? Math.max(...allRecords.map(r => r.id)) + 1 
                     : 1;
-                const newRecord = { id: newId, ...record };
-                records.push(newRecord);
-                localStorage.setItem('expenseRecords', JSON.stringify(records));
+                // 添加用户ID，关联到当前用户
+                const newRecord = { id: newId, userId: currentUser.id, ...record };
+                allRecords.push(newRecord);
+                localStorage.setItem('expenseRecords', JSON.stringify(allRecords));
                 return newRecord;
             },
             
             // 更新记录
             updateRecord(id, updatedData) {
-                const records = this.getRecords();
-                const index = records.findIndex(r => r.id === id);
+                const currentUser = AuthService.getCurrentUser();
+                if (!currentUser) return null;
+                
+                const allRecords = JSON.parse(localStorage.getItem('expenseRecords') || '[]');
+                const index = allRecords.findIndex(r => r.id === id && r.userId === currentUser.id);
+                
                 if (index !== -1) {
-                    records[index] = { ...records[index], ...updatedData };
-                    localStorage.setItem('expenseRecords', JSON.stringify(records));
-                    return records[index];
+                    allRecords[index] = { ...allRecords[index], ...updatedData };
+                    localStorage.setItem('expenseRecords', JSON.stringify(allRecords));
+                    return allRecords[index];
                 }
                 return null;
             },
             
             // 删除记录
             deleteRecord(id) {
-                const records = this.getRecords();
-                const updatedRecords = records.filter(r => r.id !== id);
+                const currentUser = AuthService.getCurrentUser();
+                if (!currentUser) return;
+                
+                const allRecords = JSON.parse(localStorage.getItem('expenseRecords') || '[]');
+                const updatedRecords = allRecords.filter(r => !(r.id === id && r.userId === currentUser.id));
                 localStorage.setItem('expenseRecords', JSON.stringify(updatedRecords));
             },
             
-            // 按条件筛选记录
+            // 按条件筛选当前用户的记录
             filterRecords(filters = {}) {
-                let records = this.getRecords();
+                const currentUser = AuthService.getCurrentUser();
+                if (!currentUser) return [];
+                
+                let allRecords = JSON.parse(localStorage.getItem('expenseRecords') || '[]');
+                // 先筛选出当前用户的记录
+                let records = allRecords.filter(r => r.userId === currentUser.id);
                 
                 // 按年份筛选
                 if (filters.year) {
@@ -775,6 +937,15 @@
         const UIController = {
             // 初始化UI
             init() {
+                // 检查用户是否已登录
+                if (AuthService.isLoggedIn()) {
+                    this.showApp();
+                    this.updateUserDisplay();
+                } else {
+                    // 显示登录模态框
+                    document.getElementById('login-modal').classList.remove('hidden');
+                }
+                
                 this.setCurrentDate();
                 this.initDateField();
                 this.renderCategories();
@@ -783,6 +954,23 @@
                 this.updateSummaryStats();
                 this.initEventListeners();
                 this.populateYearSelector();
+            },
+            
+            // 显示应用内容（用户已登录）
+            showApp() {
+                document.getElementById('login-modal').classList.add('hidden');
+                // 可以在这里添加应用内容的显示逻辑
+            },
+            
+            // 更新用户显示
+            updateUserDisplay() {
+                const user = AuthService.getCurrentUser();
+                if (user) {
+                    document.getElementById('user-display').textContent = `欢迎，${user.username}`;
+                    document.getElementById('mobile-user-display').textContent = user.username;
+                    document.getElementById('welcome-username').textContent = user.username;
+                    document.getElementById('logout-btn').classList.remove('hidden');
+                }
             },
             
             // 设置当前日期显示
@@ -870,7 +1058,7 @@
                             <td colspan="5" class="px-4 py-8 text-gray-500">
                                 <div class="flex flex-col items-center">
                                     <i class="fa fa-cat text-4xl text-gray-300 mb-2"></i>
-                                    <p>没有找到记录哦</p>
+                                    <p>还没有记录哦，添加你的第一笔支出吧！</p>
                                 </div>
                             </td>
                         </tr>
@@ -1158,7 +1346,11 @@
             // 填充年份选择器
             populateYearSelector() {
                 const yearSelect = document.getElementById('stats-year');
-                const records = DataModel.getRecords();
+                const currentUser = AuthService.getCurrentUser();
+                if (!currentUser) return;
+                
+                const allRecords = JSON.parse(localStorage.getItem('expenseRecords') || '[]');
+                const userRecords = allRecords.filter(r => r.userId === currentUser.id);
                 
                 // 获取所有记录中的年份
                 const years = new Set();
@@ -1166,7 +1358,7 @@
                 years.add(currentYear);
                 years.add(currentYear - 1);
                 
-                records.forEach(record => {
+                userRecords.forEach(record => {
                     const year = new Date(record.date).getFullYear();
                     years.add(year);
                 });
@@ -1202,8 +1394,9 @@
                 document.querySelectorAll('.edit-record').forEach(button => {
                     button.addEventListener('click', (e) => {
                         const id = parseInt(e.currentTarget.dataset.id);
-                        const records = DataModel.getRecords();
-                        const record = records.find(r => r.id === id);
+                        const allRecords = JSON.parse(localStorage.getItem('expenseRecords') || '[]');
+                        const currentUser = AuthService.getCurrentUser();
+                        const record = allRecords.find(r => r.id === id && r.userId === currentUser.id);
                         
                         if (record) {
                             document.getElementById('edit-id').value = record.id;
@@ -1229,6 +1422,73 @@
             
             // 初始化所有事件监听器
             initEventListeners() {
+                // 登录表单提交
+                document.getElementById('login-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const username = document.getElementById('login-username').value;
+                    const password = document.getElementById('login-password').value;
+                    
+                    const result = AuthService.login(username, password);
+                    if (result.success) {
+                        this.showApp();
+                        this.updateUserDisplay();
+                        this.renderHistory();
+                        this.renderStatistics();
+                        this.updateSummaryStats();
+                        this.populateYearSelector();
+                        this.showToast(result.message);
+                    } else {
+                        alert(result.message);
+                    }
+                });
+                
+                // 注册表单提交
+                document.getElementById('register-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const username = document.getElementById('register-username').value;
+                    const password = document.getElementById('register-password').value;
+                    const confirm = document.getElementById('register-confirm').value;
+                    
+                    if (password !== confirm) {
+                        alert('两次输入的密码不一致');
+                        return;
+                    }
+                    
+                    const result = AuthService.register(username, password);
+                    if (result.success) {
+                        this.showLoginForm();
+                        document.getElementById('login-username').value = username;
+                        document.getElementById('login-password').value = password;
+                        this.showToast(result.message);
+                    } else {
+                        alert(result.message);
+                    }
+                });
+                
+                // 切换到登录表单
+                document.getElementById('show-login').addEventListener('click', () => {
+                    this.showLoginForm();
+                });
+                
+                // 切换到注册表单
+                document.getElementById('show-register').addEventListener('click', () => {
+                    this.showRegisterForm();
+                });
+                
+                // 登出按钮
+                document.getElementById('logout-btn').addEventListener('click', () => {
+                    AuthService.logout();
+                    window.location.reload(); // 重新加载页面，显示登录界面
+                });
+                
+                // 移动端登出按钮
+                document.getElementById('mobile-logout-btn').addEventListener('click', () => {
+                    AuthService.logout();
+                    window.location.reload(); // 重新加载页面，显示登录界面
+                });
+                
                 // 移动端菜单切换
                 document.getElementById('mobile-menu-button').addEventListener('click', () => {
                     document.getElementById('mobile-menu').classList.toggle('hidden');
@@ -1439,6 +1699,26 @@
                         header.classList.remove('py-2');
                     }
                 });
+            },
+            
+            // 显示登录表单
+            showLoginForm() {
+                document.getElementById('login-form').classList.remove('hidden');
+                document.getElementById('register-form').classList.add('hidden');
+                document.getElementById('show-login').classList.add('border-primary', 'text-primary');
+                document.getElementById('show-login').classList.remove('border-transparent', 'text-gray-500');
+                document.getElementById('show-register').classList.add('border-transparent', 'text-gray-500');
+                document.getElementById('show-register').classList.remove('border-primary', 'text-primary');
+            },
+            
+            // 显示注册表单
+            showRegisterForm() {
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('register-form').classList.remove('hidden');
+                document.getElementById('show-register').classList.add('border-primary', 'text-primary');
+                document.getElementById('show-register').classList.remove('border-transparent', 'text-gray-500');
+                document.getElementById('show-login').classList.add('border-transparent', 'text-gray-500');
+                document.getElementById('show-login').classList.remove('border-primary', 'text-primary');
             },
             
             // 重置图标选择状态
