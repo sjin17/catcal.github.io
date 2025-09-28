@@ -103,7 +103,7 @@ def token_required(f):
 # API接口
 
 # 用户认证接口
-@app.route('/api/auth/register', methods=['POST'])
+@app.route('/catcal/api/auth/register', methods=['POST'])
 def register():
     """用户注册接口 - 前端注册表单提交到此接口"""
     data = request.get_json()
@@ -174,7 +174,7 @@ def login():
         }
     }), 200
 
-@app.route('/api/auth/me', methods=['GET'])
+@app.route('/catcal/api/auth/me', methods=['GET'])
 @token_required
 def get_current_user(current_user):
     """获取当前登录用户信息 - 前端可调用此接口验证登录状态"""
@@ -185,7 +185,7 @@ def get_current_user(current_user):
     }), 200
 
 # 分类管理接口
-@app.route('/api/categories', methods=['GET'])
+@app.route('/catcal/api/categories', methods=['GET'])
 @token_required
 def get_categories(current_user):
     """获取所有支出分类 - 前端加载分类列表时调用此接口"""
@@ -196,7 +196,7 @@ def get_categories(current_user):
         'icon': c.icon
     } for c in categories]), 200
 
-@app.route('/api/categories', methods=['POST'])
+@app.route('/catcal/api/categories', methods=['POST'])
 @token_required
 def add_category(current_user):
     """添加新分类 - 前端添加分类表单提交到此接口"""
@@ -226,7 +226,7 @@ def add_category(current_user):
         db.session.rollback()
         return jsonify({'message': '添加分类失败', 'error': str(e)}), 500
 
-@app.route('/api/categories/<int:category_id>', methods=['DELETE'])
+@app.route('/catcal/api/categories/<int:category_id>', methods=['DELETE'])
 @token_required
 def delete_category(current_user, category_id):
     """删除分类 - 前端删除分类时调用此接口"""
@@ -242,7 +242,7 @@ def delete_category(current_user, category_id):
         return jsonify({'message': '删除分类失败', 'error': str(e)}), 500
 
 # 支出记录接口
-@app.route('/api/records', methods=['GET'])
+@app.route('/catcal/api/records', methods=['GET'])
 @token_required
 def get_records(current_user):
     """获取当前用户的支出记录 - 前端加载历史记录时调用此接口"""
@@ -345,7 +345,7 @@ def add_record(current_user):
         db.session.rollback()
         return jsonify({'message': '添加记录失败', 'error': str(e)}), 500
 
-@app.route('/api/records/<int:record_id>', methods=['PUT'])
+@app.route('/catcal/api/records/<int:record_id>', methods=['PUT'])
 @token_required
 def update_record(current_user, record_id):
     """更新支出记录 - 前端编辑记录表单提交到此接口"""
@@ -402,7 +402,7 @@ def delete_record(current_user, record_id):
         return jsonify({'message': '删除记录失败', 'error': str(e)}), 500
 
 # 统计接口
-@app.route('/api/statistics/categories', methods=['GET'])
+@app.route('/catcal/api/statistics/categories', methods=['GET'])
 @token_required
 def get_category_stats(current_user):
     """获取分类统计数据 - 前端生成统计图表时调用此接口"""
