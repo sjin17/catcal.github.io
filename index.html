@@ -6,7 +6,7 @@
     <title>猫咪记账本</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <script src="https://cdncdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
     <script>
         // Tailwind 配置
         tailwind.config = {
@@ -153,12 +153,11 @@
             <main class="container mx-auto px-4 pt-24 pb-16">
                 <!-- 导航标签 -->
                 <div class="flex border-b mb-6 overflow-x-auto pb-1 hide-scrollbar">
-
-                    <button class="nav-tab px-4 py-2 font-medium text-gray-500 hover:text-primary mr-2 whitespace-nowrap" data-tab="records">
-                        <i class="fa fa-list-alt mr-1"></i> 记录
-                    </button>
-                    <button class="nav-tab active px-4 py-2 font-medium text-primary border-b-2 border-primary mr-2 whitespace-nowrap" data-tab="dashboard">
+                    <button class="nav-tab px-4 py-2 font-medium text-gray-500 hover:text-primary mr-2 whitespace-nowrap" data-tab="dashboard">
                         <i class="fa fa-dashboard mr-1"></i> 总览
+                    </button>
+                    <button class="nav-tab active px-4 py-2 font-medium text-primary border-b-2 border-primary mr-2 whitespace-nowrap" data-tab="records">
+                        <i class="fa fa-list-alt mr-1"></i> 记录
                     </button>
                     <button class="nav-tab px-4 py-2 font-medium text-gray-500 hover:text-primary mr-2 whitespace-nowrap" data-tab="categories">
                         <i class="fa fa-tags mr-1"></i> 分类
@@ -169,7 +168,7 @@
                 </div>
 
                 <!-- 总览页面 -->
-                <div id="dashboard-tab" class="tab-content">
+                <div id="dashboard-tab" class="tab-content hidden">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                         <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                             <div class="flex justify-between items-start">
@@ -268,8 +267,8 @@
                     </div>
                 </div>
 
-                <!-- 记录页面 -->
-                <div id="records-tab" class="tab-content hidden">
+                <!-- 记录页面 (默认首页) -->
+                <div id="records-tab" class="tab-content">
                     <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
                         <h3 class="font-bold text-gray-800 mb-4">添加支出记录</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -552,7 +551,7 @@
     <div id="toast" class="fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50"></div>
 
     <script>
-        // API服务封装 - 所有接口请求都通过这里发送
+        // API服务封装
         const API_BASE_URL = 'https://qisimiaoxiang.site/catcal/api';
 
         // 工具函数：处理请求头（添加认证token）
@@ -570,11 +569,10 @@
             return headers;
         };
 
-        // API对象封装（替代原来的export方式）
+        // API对象封装
         const API = {
             // 认证相关接口
             Auth: {
-                // 用户注册 - 对应后端接口：https://qisimiaoxiang.site/api/auth/register
                 register: async (username, password) => {
                     const response = await fetch(`${API_BASE_URL}/auth/register`, {
                         method: 'POST',
@@ -584,7 +582,6 @@
                     return response.json();
                 },
                 
-                // 用户登录 - 对应后端接口：https://qisimiaoxiang.site/api/auth/login
                 login: async (username, password) => {
                     const response = await fetch(`${API_BASE_URL}/auth/login`, {
                         method: 'POST',
@@ -594,7 +591,6 @@
                     return response.json();
                 },
                 
-                // 获取当前用户信息 - 对应后端接口：https://qisimiaoxiang.site/api/auth/me
                 getCurrentUser: async () => {
                     const response = await fetch(`${API_BASE_URL}/auth/me`, {
                         method: 'GET',
@@ -606,7 +602,6 @@
             
             // 分类相关接口
             Category: {
-                // 获取所有分类 - 对应后端接口：https://qisimiaoxiang.site/api/categories
                 getAll: async () => {
                     const response = await fetch(`${API_BASE_URL}/categories`, {
                         method: 'GET',
@@ -615,7 +610,6 @@
                     return response.json();
                 },
                 
-                // 添加新分类 - 对应后端接口：https://qisimiaoxiang.site/api/categories
                 add: async (category) => {
                     const response = await fetch(`${API_BASE_URL}/categories`, {
                         method: 'POST',
@@ -625,7 +619,6 @@
                     return response.json();
                 },
                 
-                // 删除分类 - 对应后端接口：https://qisimiaoxiang.site/api/categories/[ID]
                 delete: async (categoryId) => {
                     const response = await fetch(`${API_BASE_URL}/categories/${categoryId}`, {
                         method: 'DELETE',
@@ -637,7 +630,6 @@
             
             // 支出记录相关接口
             Record: {
-                // 获取记录列表（支持筛选）- 对应后端接口：https://qisimiaoxiang.site/api/records
                 getRecords: async (params = {}) => {
                     // 构建查询参数
                     const queryParams = new URLSearchParams();
@@ -654,7 +646,6 @@
                     return response.json();
                 },
                 
-                // 添加新记录 - 对应后端接口：https://qisimiaoxiang.site/api/records
                 addRecord: async (record) => {
                     const response = await fetch(`${API_BASE_URL}/records`, {
                         method: 'POST',
@@ -664,7 +655,6 @@
                     return response.json();
                 },
                 
-                // 更新记录 - 对应后端接口：https://qisimiaoxiang.site/api/records/[ID]
                 updateRecord: async (recordId, record) => {
                     const response = await fetch(`${API_BASE_URL}/records/${recordId}`, {
                         method: 'PUT',
@@ -674,7 +664,6 @@
                     return response.json();
                 },
                 
-                // 删除记录 - 对应后端接口：https://qisimiaoxiang.site/api/records/[ID]
                 deleteRecord: async (recordId) => {
                     const response = await fetch(`${API_BASE_URL}/records/${recordId}`, {
                         method: 'DELETE',
@@ -686,7 +675,6 @@
             
             // 统计相关接口
             Statistics: {
-                // 分类统计 - 对应后端接口：https://qisimiaoxiang.site/api/statistics/categories
                 getCategoryStats: async (params = {}) => {
                     const queryParams = new URLSearchParams();
                     Object.entries(params).forEach(([key, value]) => {
@@ -702,7 +690,6 @@
                     return response.json();
                 },
                 
-                // 趋势统计 - 对应后端接口：https://qisimiaoxiang.site/api/statistics/trends
                 getTrendStats: async (params = {}) => {
                     const queryParams = new URLSearchParams();
                     Object.entries(params).forEach(([key, value]) => {
@@ -1884,3 +1871,4 @@
     </script>
 </body>
 </html>
+    
