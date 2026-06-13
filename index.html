@@ -270,7 +270,7 @@
   ::-webkit-scrollbar-thumb{background:rgba(140,140,140,.35);border-radius:980px}
   ::-webkit-scrollbar-thumb:hover{background:rgba(140,140,140,.55)}
   ::-webkit-scrollbar-track{background:transparent}
-  /* ===== 批注 / 修改小结 ===== */
+  /* ===== 批注 / 修改批注 ===== */
   #commentFab{position:fixed;z-index:120;background:var(--accent);color:#fff;border:none;border-radius:980px;padding:7px 13px;font-size:12.5px;font-weight:600;box-shadow:var(--shadow);display:none;align-items:center;gap:4px}
   #commentFab.show{display:inline-flex}
   #commentFab:active{transform:scale(.95)}
@@ -790,7 +790,7 @@ function renderHint(){
 function renderSideR(){
   var c=CH();var r=$('sideR');
   r.innerHTML='<h3>修改批注 <span id="sr-cmtCount" style="color:var(--muted);font-weight:400">('+c.comments.length+')</span></h3>'
-    +'<div class="addrow"><button class="tbtn" id="sr-copyCh">复制本章小结</button><button class="tbtn" id="sr-copyAll">全书</button></div>'
+    +'<div class="addrow"><button class="tbtn" id="sr-copyCh">复制本章批注</button><button class="tbtn" id="sr-copyAll">全书</button></div>'
     +'<div id="sr-cmts"></div>'
     +'<h3>出场人物</h3><div class="chips" id="sr-chars" style="margin-bottom:6px"></div>'
     +'<h3>时间线<button class="ic-add" id="sr-addEv">+</button></h3><div id="sr-events"></div>'
@@ -859,7 +859,7 @@ function pruneComments(c){var n=c.comments.length;c.comments=c.comments.filter(f
 function refreshComments(){var c=CH();if(!$('sr-cmts'))return;var cnt=$('sr-cmtCount');if(cnt)cnt.textContent='('+c.comments.length+')';renderCommentList($('sr-cmts'),c);}
 function renderCommentList(box,c){
   box.innerHTML='';
-  if(!c.comments.length){box.innerHTML='<div style="color:var(--muted);font-size:12.5px;margin-bottom:8px">选中正文 → 点「＋ 批注」记录修改意见，会自动汇总成可复制的小结。</div>';return;}
+  if(!c.comments.length){box.innerHTML='<div style="color:var(--muted);font-size:12.5px;margin-bottom:8px">选中正文 → 点「＋ 批注」记录修改意见，会自动汇总成可复制的批注。</div>';return;}
   c.comments.forEach(function(cm){
     var snip=cm.quote.length>40?cm.quote.slice(0,40)+'…':cm.quote;
     var el=document.createElement('div');el.className='cmt';el.style.cursor='pointer';el.title='点击跳转到正文该段';
@@ -895,8 +895,8 @@ function locateComment(cm){
   syncSel();
 }
 function chapSummaryText(c){if(!c.comments.length)return '';var s='— '+(c.title||'未命名')+' —\n';c.comments.forEach(function(cm,i){s+=(i+1)+'. 【第 '+cm.para+' 段】\n   原文：“'+cm.quote+'”\n   意见：'+(cm.note||'（未填写）')+'\n';});return s;}
-function copyChSummary(){var w=W(),c=CH();if(!c.comments.length){toast('本章还没有批注');return;}copyText('【修改小结 ·《'+w.title+'》】\n\n'+chapSummaryText(c),'已复制本章修改小结');}
-function copyAllSummary(){var w=W();var blocks=w.chapters.map(chapSummaryText).filter(Boolean);if(!blocks.length){toast('全书还没有批注');return;}copyText('【修改小结 ·《'+w.title+'》】\n\n'+blocks.join('\n'),'已复制全书修改小结');}
+function copyChSummary(){var w=W(),c=CH();if(!c.comments.length){toast('本章还没有批注');return;}copyText('【修改批注 ·《'+w.title+'》】\n\n'+chapSummaryText(c),'已复制本章修改批注');}
+function copyAllSummary(){var w=W();var blocks=w.chapters.map(chapSummaryText).filter(Boolean);if(!blocks.length){toast('全书还没有批注');return;}copyText('【修改批注 ·《'+w.title+'》】\n\n'+blocks.join('\n'),'已复制全书修改批注');}
 
 /* ===== 章节版本快照（轻量） ===== */
 var MAXSNAP=3;
