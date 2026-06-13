@@ -83,8 +83,12 @@ class Stat(db.Model):
     data = db.Column(db.Text, default='{}')   # {"2026-06-13": 1280, ...}
 
 
+# 确保 instance/ 目录存在（SQLite 数据库文件放这里）。
+# 这样即使仓库里不带 instance/ 和 .db 文件，首次运行也会自动创建目录和数据库。
+os.makedirs(app.instance_path, exist_ok=True)
+
 with app.app_context():
-    db.create_all()
+    db.create_all()      # 首次运行自动建表（User / Work / Stat）；已存在则跳过，不动现有数据
 
 
 # ----------------------------- 鉴权工具 -----------------------------
