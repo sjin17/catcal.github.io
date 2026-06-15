@@ -118,13 +118,18 @@ def make_token(user_id):
         app.config['SECRET_KEY'], algorithm="HS256")
 
 
+_RE_CJK = re.compile(r'[^\x00-\x7F\s]')       # 非 ASCII 且非空白：中文、中文标点、全角符号等，逐字计 1
+_RE_WORD = re.compile(r'[A-Za-z0-9]+')        # ASCII 字母/数字串：每串计 1（英文单词、数字）
+
+def count_words(s):
+    """字数口径与前端一致（对齐 Word"字数"）：非 ASCII 逐字计1 + 英文单词/数字串各计1，半角标点与空白不计。"""
+    s = s or ''
+    return len(_RE_CJK.findall(s)) + len(_RE_WORD.findall(s))
+
 def word_count_of(data_obj):
-    """从作品 JSON 估算总字数（去掉空白），仅用于列表页展示。"""
+    """从作品 JSON 统计总字数，仅用于列表页展示。"""
     try:
-        total = 0
-        for c in data_obj.get('chapters', []):
-            total += len(''.join((c.get('content') or '').split()))
-        return total
+        return sum(count_words(c.get('content') or '') for c in data_obj.get('chapters', []))
     except Exception:
         return 0
 
